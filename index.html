@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gry — olektorun</title>
+  <style>
+    :root {
+      --bg: #0e1116;
+      --panel: #181d26;
+      --panel-hover: #212836;
+      --border: #2a3240;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #f0883e;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4f6fa;
+        --panel: #ffffff;
+        --panel-hover: #ffffff;
+        --border: #d7dee8;
+        --text: #1c2430;
+        --muted: #5a6472;
+        --accent: #d2691e;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4rem 1.25rem;
+    }
+    header { text-align: center; margin-bottom: 2.5rem; }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 6vw, 3.25rem);
+      letter-spacing: 0.04em;
+    }
+    h1 .dot { color: var(--accent); }
+    header p { color: var(--muted); margin: 0.6rem 0 0; font-size: 1.05rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 760px;
+    }
+    a.card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.6rem 1.5rem;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+    a.card:hover {
+      transform: translateY(-4px);
+      background: var(--panel-hover);
+      border-color: var(--accent);
+    }
+    .emoji { font-size: 2.4rem; line-height: 1; }
+    .card h2 { margin: 0.9rem 0 0.35rem; font-size: 1.4rem; letter-spacing: 0.03em; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    .play {
+      display: inline-block;
+      margin-top: 1rem;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    footer { margin-top: 3rem; color: var(--muted); font-size: 0.85rem; text-align: center; }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Moje gry<span class="dot">.</span></h1>
+    <p>Mini-gry przeglądarkowe — grasz od razu, bez instalacji.</p>
+  </header>
+
+  <main class="grid">
+    <a class="card" href="./dungeons/">
+      <div class="emoji">🗡️</div>
+      <h2>Dungeons Labirynth</h2>
+      <p>Eksploruj lochy, unikaj wrogów, przetrwaj.</p>
+      <span class="play">Graj →</span>
+    </a>
+
+    <a class="card" href="./zombies/">
+      <div class="emoji">🧟</div>
+      <h2>Zombies</h2>
+      <p>Odpieraj fale zombie tak długo, jak dasz radę.</p>
+      <span class="play">Graj →</span>
+    </a>
+  </main>
+
+  <footer>
+    Autor: <a href="https://github.com/olektorun">olektorun</a>
+  </footer>
+</body>
+</html>

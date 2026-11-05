@@ -116,7 +116,7 @@ const LEVELS = [
     b.coinRow(6, 9, 13);
     b.fill(12, 13, 14, 15);
     b.sign(17, 'SPACE to jump · hold it to go higher');
-    b.q(19, 12, 'coin'); b.q(20, 12, 'heart'); b.q(21, 12, 'coin');
+    b.q(4, 13, 'heart'); b.q(20, 13, 'coin'); b.q(21, 13, 'coin');
     b.enemy('blob', 16);
     b.coin(24, 14); b.coin(25, 13); b.coin(26, 14);
     b.ground(27, 46);
@@ -136,14 +136,14 @@ const LEVELS = [
     b.coin(88, 11); b.coin(93, 10); b.coin(98, 11);
     b.enemy('buzzer', 92, 10, { range: 70 });
     b.ground(100, 124);
-    b.q(102, 12, 'fire'); b.sign(101, 'Red spikes hurt — burn them');
+    b.q(102, 13, 'fire'); b.sign(101, 'Red spikes hurt — burn them');
     b.enemy('spiky', 108);
     b.plat(104, 107, 13); b.plat(108, 111, 10); b.coinRow(108, 111, 9);
     b.fill(113, 113, 8, 15);
     b.fake(119, 122, 13, 15); b.big(120, 14);          // secret: the mound is hollow
     b.plat(126, 127, 14);
     b.ground(129, 159);
-    b.q(132, 12, 'star');
+    b.q(132, 13, 'star');
     b.enemy('blob', 135); b.enemy('blob', 137);
     b.fill(140, 140, 15, 15); b.fill(141, 141, 14, 15); b.fill(142, 142, 13, 15); b.fill(143, 145, 12, 15);
     b.coinRow(143, 145, 11);
@@ -152,7 +152,7 @@ const LEVELS = [
   { id: '1-2', name: 'TREETOPS', w: 170, sky: SKY_LATE, build(b) {
     b.ground(0, 14);
     b.sign(3, 'Stomp enemies from above!');
-    b.q(7, 12, 'coin'); b.q(8, 12, 'coin');
+    b.q(7, 13, 'coin'); b.q(8, 13, 'coin');
     b.enemy('blob', 11);
     b.mplat(17, 14, 3, 64, 0, 0.02); b.coinRow(16, 21, 11);
     b.ground(23, 40);
@@ -163,13 +163,13 @@ const LEVELS = [
     b.enemy('buzzer', 49, 9, { range: 90 });
     b.ground(56, 75);
     b.enemy('blob', 60); b.enemy('blob', 63);
-    b.q(66, 12, 'heart');
+    b.q(66, 13, 'heart');
     b.check(72);
     b.mplat(80, 13, 3, 64, 0, 0.022);
     b.plat(86, 88, 11); b.coinRow(86, 88, 10);
     b.mplat(90, 12, 3, 0, 64, 0.025);
     b.ground(96, 118);
-    b.q(100, 12, 'fire');
+    b.q(100, 13, 'fire');
     b.enemy('spiky', 103);
     b.fill(106, 106, 5, 12); b.fill(110, 110, 5, 15);
     b.coin(108, 12); b.coin(108, 9); b.coin(108, 6); b.big(108, 3);
@@ -181,19 +181,19 @@ const LEVELS = [
     b.coinRow(126, 130, 8);
     b.enemy('buzzer', 130, 7, { range: 80 });
     b.ground(141, 169);
-    b.q(144, 12, 'star');
+    b.q(144, 13, 'star');
     b.spring(147); b.plat(149, 153, 9); b.big(153, 8);
     b.enemy('hopper', 150); b.enemy('hopper', 154); b.enemy('blob', 157);
     b.goal(162);
   } },
   { id: '1-3', name: 'BIG BLOB', w: 100, sky: SKY_DUSK, build(b) {
     b.ground(0, 30);
-    b.q(8, 12, 'heart'); b.q(16, 12, 'fire');
+    b.q(8, 13, 'heart'); b.q(16, 13, 'fire');
     b.enemy('blob', 12); b.enemy('hopper', 20); b.enemy('blob', 26);
     b.plat(32, 33, 13); b.big(32, 10);
     b.ground(35, 69);
     b.enemy('spiky', 45); b.enemy('blob', 52);
-    b.q(58, 12, 'heart'); b.big(58, 9);
+    b.q(58, 13, 'heart'); b.big(58, 9);
     b.check(64);
     b.sign(66, 'Stomp the Big Blob!');
     b.ground(70, 99); b.fill(99, 99, 0, 15);
@@ -730,7 +730,17 @@ function updateWorld() {
   }
   L.fires = L.fires.filter(f => f.life > 0);
 
-  for (const it of L.items) if (it.rise > 0) { it.rise--; it.y -= 1; }
+  for (const it of L.items) {
+    if (it.rise > 0) {
+      it.rise--; it.y -= 1;
+      // hop off the block, away from the player, and drop to the ground where it is easy to grab
+      if (!it.rise) { it.vx = (p.x + p.w / 2 < it.x + 10 ? 1 : -1) * 1.6; it.vy = -3; }
+    } else {
+      moveBody(it, 0.4);
+      if (it.grounded) it.vx *= 0.85;
+      if (it.y > LH * T) it.taken = true;
+    }
+  }
   L.items = L.items.filter(it => !it.taken);
   for (const k in L.bumps) if (--L.bumps[k] <= 0) delete L.bumps[k];
   for (const c of L.fly) { c.y += c.vy; c.vy += 0.5; c.life--; }

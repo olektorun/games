@@ -1,4 +1,4 @@
-<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Złota Liga</title><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Diamond League</title><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
@@ -164,20 +164,20 @@
   <!-- pasek głośności przy lewej krawędzi, od dołu do góry -->
   <div class="volrail" id="volRail">
     <span class="volval" id="volVal">70</span>
-    <input type="range" id="volInput" min="0" max="100" value="70" aria-label="Głośność">
-    <span class="vollabel">Dźwięk</span>
+    <input type="range" id="volInput" min="0" max="100" value="70" aria-label="Volume">
+    <span class="vollabel">Sound</span>
   </div>
 
-  <button class="ghost hudbtn" id="pauseBtn" hidden>Pauza</button>
-  <button class="ghost cornerbtn" id="infoBtn">O grze</button>
+  <button class="ghost hudbtn" id="pauseBtn" hidden>Pause</button>
+  <button class="ghost cornerbtn" id="infoBtn">About</button>
 
   <div class="screen" id="titleScreen">
-    <h1>Złota Liga</h1>
-    <button id="playBtn">Graj</button>
+    <h1>Diamond League</h1>
+    <button id="playBtn">Play</button>
   </div>
 
   <div class="screen pane" id="setupScreen" hidden>
-    <div class="badge">Ustawienia rundy</div>
+    <div class="badge">Round settings</div>
     <div class="opts">
       <div class="opt">
         <span class="optlabel">Arena</span>
@@ -185,103 +185,103 @@
         <p class="opthelp" id="arenaHelp"></p>
       </div>
       <div class="opt">
-        <span class="optlabel">Tryb</span>
+        <span class="optlabel">Mode</span>
         <div class="seg" id="segMode"></div>
         <p class="opthelp" id="modeHelp"></p>
       </div>
       <div class="opt">
-        <span class="optlabel">Przeciwnicy</span>
+        <span class="optlabel">Opponents</span>
         <div class="seg" id="segBots"></div>
         <p class="opthelp" id="botsHelp"></p>
       </div>
       <div class="opt">
-        <span class="optlabel">Krew</span>
+        <span class="optlabel">Blood</span>
         <div class="seg" id="segGore"></div>
-        <p class="opthelp">Zmienisz to także w pauzie, w trakcie rundy.</p>
+        <p class="opthelp">You can also change this in the pause menu during a round.</p>
       </div>
     </div>
     <div class="row">
       <button id="startBtn">Start</button>
-      <button class="ghost" id="backBtn">Wstecz</button>
+      <button class="ghost" id="backBtn">Back</button>
     </div>
   </div>
 
   <div class="screen pane" id="infoScreen" hidden>
-    <div class="badge">O grze</div>
-    <h2>Złota Liga</h2>
+    <div class="badge">About the game</div>
+    <h2>Diamond League</h2>
     <div class="info">
       <section>
-        <h3>Zasady</h3>
-        <p>Wszyscy walczą przeciw wszystkim na jednej arenie. W trybie <b>ostatni żywy</b> masz jedno życie, a od dołu wzbiera ciecz, która wypycha wszystkich na górę. W trybie <b>rzeź</b> wracasz do gry po dwóch sekundach, a wygrywa pierwszy z dziesięcioma trafieniami.</p>
+        <h3>Rules</h3>
+        <p>Everyone fights everyone on one arena. In <b>last standing</b> mode you have one life, and a liquid rises from below and pushes everyone to the top. In <b>deathmatch</b> mode you come back after two seconds, and the first to ten kills wins.</p>
       </section>
       <section>
-        <h3>Odrzut to drugi skok</h3>
-        <p>Każdy strzał odpycha Cię w stronę przeciwną do lufy. Celuj w dół i strzelaj, żeby wznieść się wyżej, niż sięga skok. Im cięższa broń, tym mocniejszy kop.</p>
+        <h3>Recoil is your second jump</h3>
+        <p>Every shot pushes you away from the barrel. Aim down and shoot to fly higher than a jump can take you. The heavier the gun, the stronger the kick.</p>
       </section>
       <section>
-        <h3>Skrzynie i bloki</h3>
-        <p>Skrzynie zasłaniają przed ostrzałem, a rozbite wypuszczają broń, apteczkę, tarczę albo <b>kryształ</b>. Kryształy to jedyne źródło bloków — same się nie odnawiają. Z bloków budujesz osłony i schodki tam, gdzie nie doskoczysz.</p>
+        <h3>Crates and blocks</h3>
+        <p>Crates protect you from fire. When broken, they drop a weapon, a medkit, a shield or a <b>crystal</b>. Crystals are the only source of blocks — blocks do not refill on their own. Use blocks to build cover, or steps where you cannot jump.</p>
       </section>
       <section>
-        <h3>Chaszcze</h3>
-        <p>Kto stoi w gęstwinie, znika przeciwnikom z oczu. Huk wystrzału zdradza pozycję na sekundę.</p>
+        <h3>Tall grass</h3>
+        <p>If you stand in tall grass, enemies cannot see you. But the sound of a shot gives away your position for one second.</p>
       </section>
       <section>
-        <h3>Sterowanie</h3>
+        <h3>Controls</h3>
         <div class="keys">
-          <div><kbd>A</kbd><kbd>D</kbd> ruch</div>
-          <div><kbd>W</kbd> / <kbd>spacja</kbd> skok</div>
-          <div><kbd>mysz</kbd> celowanie</div>
-          <div><kbd>LPM</kbd> strzał</div>
-          <div><kbd>PPM</kbd> / <kbd>E</kbd> blok</div>
-          <div><kbd>Q</kbd> wróć do pistoletu</div>
-          <div><kbd>P</kbd> / <kbd>Esc</kbd> pauza</div>
-          <div><kbd>R</kbd> nowa runda</div>
-          <div><kbd>M</kbd> wycisz</div>
+          <div><kbd>A</kbd><kbd>D</kbd> move</div>
+          <div><kbd>W</kbd> / <kbd>space</kbd> jump</div>
+          <div><kbd>mouse</kbd> aim</div>
+          <div><kbd>LMB</kbd> shoot</div>
+          <div><kbd>RMB</kbd> / <kbd>E</kbd> block</div>
+          <div><kbd>Q</kbd> back to pistol</div>
+          <div><kbd>P</kbd> / <kbd>Esc</kbd> pause</div>
+          <div><kbd>R</kbd> new round</div>
+          <div><kbd>M</kbd> mute</div>
         </div>
       </section>
       <section class="wide">
-        <h3>Broń</h3>
+        <h3>Weapons</h3>
         <ul class="wlist">
-          <li><b>Pistolet</b> — startowy, bez limitu amunicji.</li>
-          <li><b>Karabinek</b> — szybka seria, słaby kop, dobry do lotu.</li>
-          <li><b>Strzelba</b> — siedem pocisków i mocny odrzut z bliska.</li>
-          <li><b>Snajperka</b> — jeden celny strzał na dystans.</li>
-          <li><b>Wyrzutnia</b> — wybuch rani wszystkich wokół.</li>
-          <li><b>Rykoszetnica</b> — pociski odbijają się trzy razy i za każdym mocniej biją.</li>
-          <li><b>Przebijacz</b> — przeszywa zawodników i ściany na wylot, a kop wynosi jak rakieta.</li>
+          <li><b>Pistol</b> — starting gun, unlimited ammo.</li>
+          <li><b>SMG</b> — fast fire, weak kick, good for flying.</li>
+          <li><b>Shotgun</b> — seven pellets and strong recoil, best up close.</li>
+          <li><b>Sniper</b> — one precise shot at long range.</li>
+          <li><b>Launcher</b> — the blast hurts everyone nearby.</li>
+          <li><b>Ricochet</b> — bullets bounce three times and hit harder after each bounce.</li>
+          <li><b>Piercer</b> — goes through players and walls, and the kick launches you like a rocket.</li>
         </ul>
       </section>
     </div>
-    <div class="row"><button id="infoBackBtn">Zamknij</button></div>
+    <div class="row"><button id="infoBackBtn">Close</button></div>
   </div>
 
   <div class="screen" id="pauseScreen" hidden>
-    <div class="badge">Przerwa w rundzie</div>
-    <h2>Pauza</h2>
+    <div class="badge">Round paused</div>
+    <h2>Paused</h2>
     <div class="opt narrow">
-      <span class="optlabel">Krew</span>
+      <span class="optlabel">Blood</span>
       <div class="seg" id="segGore2"></div>
     </div>
     <div class="row">
-      <button id="resumeBtn">Wróć do gry</button>
-      <button class="ghost" id="restartBtn">Nowa runda</button>
-      <button class="ghost" id="toMenuBtn">Menu główne</button>
+      <button id="resumeBtn">Resume</button>
+      <button class="ghost" id="restartBtn">New round</button>
+      <button class="ghost" id="toMenuBtn">Main menu</button>
     </div>
-    <div class="foot">P lub Esc &mdash; wróć do gry</div>
+    <div class="foot">P or Esc &mdash; resume</div>
   </div>
 
   <div class="screen" id="endScreen" hidden>
-    <div class="badge" id="endBadge">Koniec rundy</div>
-    <h2 id="endTitle">Zwycięstwo</h2>
+    <div class="badge" id="endBadge">Round over</div>
+    <h2 id="endTitle">Victory</h2>
     <div class="stats">
-      <span>Trafienia: <b id="stKills">0</b></span>
-      <span>Czas: <b id="stTime">0:00</b></span>
-      <span>Rundy wygrane: <b id="stWins">0</b></span>
+      <span>Kills: <b id="stKills">0</b></span>
+      <span>Time: <b id="stTime">0:00</b></span>
+      <span>Rounds won: <b id="stWins">0</b></span>
     </div>
     <div class="row">
-      <button id="againBtn">Jeszcze raz</button>
-      <button class="ghost" id="setupBtn">Zmień ustawienia</button>
+      <button id="againBtn">Play again</button>
+      <button class="ghost" id="setupBtn">Change settings</button>
       <button class="ghost" id="menuBtn">Menu</button>
     </div>
   </div>
@@ -317,7 +317,7 @@ const C = {
 };
 
 const TEAMS = [
-  { name:'TY',    col:'#35E0CE', dark:'#0E5F58' },
+  { name:'YOU',    col:'#35E0CE', dark:'#0E5F58' },
   { name:'BOT 1', col:'#FF4E7A', dark:'#6E1330' },
   { name:'BOT 2', col:'#FFD34E', dark:'#6B4E0C' },
   { name:'BOT 3', col:'#A78BFA', dark:'#3D2B70' },
@@ -334,17 +334,17 @@ const DM_TARGET = 10;
 
 // ============================== BRONIE ==============================
 const WEAPONS = {
-  pistol: { name:'Pistolet', dmg:19, rof:11, spd:15.5, recoil:2.7, spread:0.020, ammo:Infinity, pellets:1, life:70, size:3.2, kick:2.2 },
-  smg:    { name:'Karabinek',dmg:9.5,rof:4,  spd:17.5, recoil:1.25, spread:0.055, ammo:110,     pellets:1, life:65, size:2.8, kick:1.1 },
-  shotgun:{ name:'Strzelba', dmg:11, rof:36, spd:14,   recoil:5.6, spread:0.185, ammo:26,      pellets:7, life:34, size:3.0, kick:2.6 },
-  sniper: { name:'Snajperka',dmg:62, rof:58, spd:27,   recoil:4.4, spread:0.004, ammo:11,      pellets:1, life:110,size:3.6, kick:6.0 },
-  rocket: { name:'Wyrzutnia',dmg:34, rof:64, spd:10,   recoil:4.8, spread:0.02,  ammo:6,       pellets:1, life:130,size:5.0, kick:3.0, rocketFlag:true },
+  pistol: { name:'Pistol', dmg:19, rof:11, spd:15.5, recoil:2.7, spread:0.020, ammo:Infinity, pellets:1, life:70, size:3.2, kick:2.2 },
+  smg:    { name:'SMG',dmg:9.5,rof:4,  spd:17.5, recoil:1.25, spread:0.055, ammo:110,     pellets:1, life:65, size:2.8, kick:1.1 },
+  shotgun:{ name:'Shotgun', dmg:11, rof:36, spd:14,   recoil:5.6, spread:0.185, ammo:26,      pellets:7, life:34, size:3.0, kick:2.6 },
+  sniper: { name:'Sniper',dmg:62, rof:58, spd:27,   recoil:4.4, spread:0.004, ammo:11,      pellets:1, life:110,size:3.6, kick:6.0 },
+  rocket: { name:'Launcher',dmg:34, rof:64, spd:10,   recoil:4.8, spread:0.02,  ammo:6,       pellets:1, life:130,size:5.0, kick:3.0, rocketFlag:true },
   // Rykoszetnica: pociski odbijają się od półek, bloków i skrzyń, a każde
   // odbicie dokłada obrażeń — nagradza strzały zza rogu.
-  ricochet:{name:'Rykoszetnica',dmg:15,rof:9,spd:13.5,recoil:2.1,spread:0.030,ammo:44,pellets:1,life:230,size:3.4,kick:1.6,bounces:3},
+  ricochet:{name:'Ricochet',dmg:15,rof:9,spd:13.5,recoil:2.1,spread:0.030,ammo:44,pellets:1,life:230,size:3.4,kick:1.6,bounces:3},
   // Przebijacz: przeszywa zawodników i dwie ściany na wylot. Najmocniejszy kop
   // w grze, więc jest zarazem bronią i katapultą.
-  rail:{name:'Przebijacz',dmg:44,rof:76,spd:30,recoil:8.6,spread:0.003,ammo:5,pellets:1,life:120,size:4.6,kick:5.5,pierce:true,solids:2}
+  rail:{name:'Piercer',dmg:44,rof:76,spd:30,recoil:8.6,spread:0.003,ammo:5,pellets:1,life:120,size:4.6,kick:5.5,pierce:true,solids:2}
 };
 
 // ============================== ARENA ==============================
@@ -362,7 +362,7 @@ const THEMES = {
     platBody:'#0D0914', platMid:'#33264A', platRim:'#F0A05C', platGrad:'126,92,158',
     grass:['#28351B','#44502A','#7E7040'], grassBack:'#1E2A16', grassBase:'16,24,14',
     liquid:['rgba(120,198,54,.6)','rgba(52,124,40,.86)','rgba(8,32,12,.97)'],
-    foam:'#D3F79A', liquidDark:'#0B2A10', liquidName:'TOŃ', ambient:null
+    foam:'#D3F79A', liquidDark:'#0B2A10', liquidName:'SLUDGE', ambient:null
   },
   zima:{
     sky:['#050A16','#0D1B33','#1E3A56','#5B8AAE'],
@@ -374,7 +374,7 @@ const THEMES = {
     platBody:'#0A101A', platMid:'#2E4763', platRim:'#CFE9FA', platGrad:'150,190,225',
     grass:['#232A2C','#41474A','#7E888C'], grassBack:'#171E22', grassBase:'12,18,26',
     liquid:['rgba(140,205,235,.55)','rgba(42,98,142,.86)','rgba(5,20,42,.97)'],
-    foam:'#E6F5FF', liquidDark:'#0A2038', liquidName:'LODOWATA WODA', ambient:'snow'
+    foam:'#E6F5FF', liquidDark:'#0A2038', liquidName:'ICY WATER', ambient:'snow'
   },
   dzungla:{
     // ciemniejsze, chłodniejsze tło + ciepłe światło na kamieniu, żeby
@@ -388,7 +388,7 @@ const THEMES = {
     platBody:'#0C120C', platMid:'#3B4632', platRim:'#E4D48C', platGrad:'118,140,88',
     grass:['#16331A','#2E6B2A','#79B23E'], grassBack:'#0F2410', grassBase:'6,18,9',
     liquid:['rgba(140,132,58,.55)','rgba(64,70,30,.88)','rgba(16,22,8,.97)'],
-    foam:'#CCCE84', liquidDark:'#20240E', liquidName:'BAGNO', ambient:'spores'
+    foam:'#CCCE84', liquidDark:'#20240E', liquidName:'SWAMP', ambient:'spores'
   },
   popiol:{
     sky:['#180B07','#3A150C','#7A2A10','#C25A18'],
@@ -400,7 +400,7 @@ const THEMES = {
     platBody:'#120B07', platMid:'#3E241A', platRim:'#FF9A4E', platGrad:'168,96,56',
     grass:['#2A1E12','#4A3620','#8A6A34'], grassBack:'#1C1109', grassBase:'22,12,8',
     liquid:['rgba(255,150,50,.6)','rgba(178,52,16,.88)','rgba(46,10,6,.97)'],
-    foam:'#FFD08A', liquidDark:'#40120A', liquidName:'OGIEŃ', ambient:'embers'
+    foam:'#FFD08A', liquidDark:'#40120A', liquidName:'FIRE', ambient:'embers'
   }
 };
 
@@ -421,8 +421,8 @@ function tower(){
 
 const ARENAS = [
   {
-    key:'piramida', name:'Piramida',
-    desc:'Szeroka podstawa i coraz ciaśniejsze piętra. Finał zawsze na szczycie.',
+    key:'piramida', name:'Pyramid',
+    desc:'Wide base and tighter floors as you go up. The final fight is always at the top.',
     w:2000, h:1340, top:535, theme:'miasto',
     crateBias:1, grassBias:1,
     plats:[
@@ -439,8 +439,8 @@ const ARENAS = [
             [1420,940],[160,940],[1840,940],[300,805],[1660,805]]
   },
   {
-    key:'wieza', name:'Wieża',
-    desc:'Zamieć śnieżna. Wąska i bardzo wysoka, walka w pionie, w dole podnosi się lodowata woda.',
+    key:'wieza', name:'Tower',
+    desc:'Snowstorm. Narrow and very tall, a vertical fight while icy water rises below.',
     w:1000, h:2300, top:415, theme:'zima',
     crateBias:0.7, grassBias:0.7,
     plats:tower(),
@@ -448,8 +448,8 @@ const ARENAS = [
             [200,1495],[760,1360],[220,1225],[700,1090],[500,415]]
   },
   {
-    key:'wawoz', name:'Wąwóz',
-    desc:'Zarośnięte ruiny w dżungli. Dwie ściany, przepaść w środku i wzbierające bagno.',
+    key:'wawoz', name:'Canyon',
+    desc:'Overgrown jungle ruins. Two walls, a gap in the middle and a rising swamp.',
     w:2000, h:1400, top:490, theme:'dzungla',
     crateBias:0.9, grassBias:0.9,
     plats:[
@@ -467,8 +467,8 @@ const ARENAS = [
             [1750,895],[1000,1090],[1000,820],[250,625],[1750,625]]
   },
   {
-    key:'hala', name:'Hala',
-    desc:'Spalone miasto. Płasko, szeroko i gęsto od gruzu, a od dołu wzbiera ogień.',
+    key:'hala', name:'Hall',
+    desc:'Burned city. Flat, wide and full of rubble, while fire rises from below.',
     w:2400, h:950, top:440, theme:'popiol',
     crateBias:1.7, grassBias:1.9,
     plats:[
@@ -987,7 +987,7 @@ function update(){
         else if(p.kind==='krysztal') f.blocks=Math.min(BLOCK_MAX,f.blocks+3);
         else { f.wep=p.kind; f.ammo=WEAPONS[p.kind].ammo; }
         if(f.isPlayer) blip('pick',0.16);
-        texts.push({x:p.x,y:p.y-14,txt:p.kind==='med'?'+ŻYCIE':p.kind==='shield'?'+TARCZA':p.kind==='krysztal'?'+3 BLOKI':WEAPONS[p.kind].name.toUpperCase(),life:52,col:f.team.col});
+        texts.push({x:p.x,y:p.y-14,txt:p.kind==='med'?'+HEALTH':p.kind==='shield'?'+SHIELD':p.kind==='krysztal'?'+3 BLOCKS':WEAPONS[p.kind].name.toUpperCase(),life:52,col:f.team.col});
       }
     }
   }
@@ -1071,7 +1071,7 @@ function update(){
     const br=fighters[c.lastHit];
     if(br && br.alive){
       br.blocks=Math.min(BLOCK_MAX,br.blocks+2);
-      if(br.isPlayer) texts.push({x:c.x+c.w/2,y:c.y,txt:'+2 BLOKI',life:52,col:br.team.col});
+      if(br.isPlayer) texts.push({x:c.x+c.w/2,y:c.y,txt:'+2 BLOCKS',life:52,col:br.team.col});
     }
     const r=Math.random();
     const kind = r<0.20?'med' : r<0.38?'shield' : r<0.58?'krysztal'
@@ -1589,7 +1589,7 @@ function hud(){
   ctx.strokeStyle='rgba(122,90,150,.4)'; ctx.lineWidth=1; ctx.stroke();
 
   ctx.font='600 13px "Barlow Condensed", sans-serif'; ctx.textAlign='left';
-  ctx.fillStyle='#9A8FA8'; ctx.fillText('ŻYCIE',36,H-80);
+  ctx.fillStyle='#9A8FA8'; ctx.fillText('HEALTH',36,H-80);
   ctx.fillStyle='rgba(255,255,255,.09)'; ctx.fillRect(36,H-76,196,11);
   ctx.fillStyle= me.hp>35?'#7BE04A':C.danger; ctx.fillRect(36,H-76,196*clamp(me.hp,0,100)/100,11);
   ctx.fillStyle='rgba(255,255,255,.09)'; ctx.fillRect(36,H-61,196,7);
@@ -1606,13 +1606,13 @@ function hud(){
   // ukrycie w chaszczach
   if(me.alive && me.hidden){
     ctx.font='700 15px "Barlow Condensed", sans-serif'; ctx.textAlign='center';
-    ctx.fillStyle='rgba(5,3,9,.6)'; ctx.fillRect(W/2-62,H-200,124,24);
-    ctx.fillStyle='#9AC45A'; ctx.fillText('UKRYTY W CHASZCZACH',W/2,H-184);
+    ctx.fillStyle='rgba(5,3,9,.6)'; ctx.fillRect(W/2-74,H-200,148,24);
+    ctx.fillStyle='#9AC45A'; ctx.fillText('HIDDEN IN THE GRASS',W/2,H-184);
     ctx.textAlign='left';
   } else if(me.alive && me.loud>0 && bushAt(me)){
     ctx.font='700 15px "Barlow Condensed", sans-serif'; ctx.textAlign='center';
-    ctx.fillStyle='rgba(5,3,9,.6)'; ctx.fillRect(W/2-66,H-200,132,24);
-    ctx.fillStyle=C.danger; ctx.fillText('HUK ZDRADZIŁ POZYCJĘ',W/2,H-184);
+    ctx.fillStyle='rgba(5,3,9,.6)'; ctx.fillRect(W/2-90,H-200,180,24);
+    ctx.fillStyle=C.danger; ctx.fillText('YOUR SHOT GAVE YOU AWAY',W/2,H-184);
     ctx.textAlign='left';
   }
 
@@ -1623,7 +1623,7 @@ function hud(){
     ctx.fillRect(x,y,11,11);
   }
   ctx.font='600 11px "Barlow Condensed", sans-serif'; ctx.fillStyle='#6F6480';
-  ctx.fillText('BLOKI',210,H-46);
+  ctx.fillText('BLOCKS',210,H-46);
 
   // prawy górny róg: w rzezi liczy się wynik, w battle royale liczba żywych
   ctx.textAlign='right';
@@ -1633,18 +1633,18 @@ function hud(){
     ctx.font='700 20px "Anton", sans-serif'; ctx.fillStyle='#6F6480';
     ctx.fillText('/'+DM_TARGET,W-30,60);
     ctx.font='600 13px "Barlow Condensed", sans-serif'; ctx.fillStyle='#9A8FA8';
-    ctx.fillText('TWOJE TRAFIENIA',W-30,78);
+    ctx.fillText('YOUR KILLS',W-30,78);
     const top=fighters.reduce((a,f)=>f.kills>a.kills?f:a,fighters[0]);
     if(top!==me && top.kills>0){
       ctx.font='600 14px "Barlow Condensed", sans-serif'; ctx.fillStyle=top.team.col;
-      ctx.fillText('PROWADZI '+top.name+' — '+top.kills,W-30,98);
+      ctx.fillText('LEADER: '+top.name+' — '+top.kills,W-30,98);
     }
   } else {
     ctx.font='700 42px "Anton", sans-serif'; ctx.fillStyle=C.bone;
     const alive=fighters.filter(f=>f.alive).length;
     ctx.fillText(alive,W-30,60);
     ctx.font='600 13px "Barlow Condensed", sans-serif'; ctx.fillStyle='#9A8FA8';
-    ctx.fillText('ŻYWI',W-30,78);
+    ctx.fillText('ALIVE',W-30,78);
   }
 
   // czas
@@ -1653,14 +1653,14 @@ function hud(){
   const t=Math.floor(matchTime/60);
   ctx.fillText(String(Math.floor(t/60))+':'+String(t%60).padStart(2,'0'),30,50);
   ctx.font='600 12px "Barlow Condensed", sans-serif'; ctx.fillStyle='#9A8FA8';
-  ctx.fillText('RUNDA',30,66);
+  ctx.fillText('ROUND',30,66);
 
   // ostrzeżenie o toni
   if(sludgeY<WORLD.h && me.alive && me.y>sludgeY-230){
     const a=0.35+Math.sin(tick*0.16)*0.25;
     ctx.globalAlpha=a; ctx.textAlign='center';
     ctx.font='700 22px "Barlow Condensed", sans-serif'; ctx.fillStyle=A.th.foam;
-    ctx.fillText(A.th.liquidName+' SIĘ PODNOSI — W GÓRĘ',W/2,72);
+    ctx.fillText(A.th.liquidName+' IS RISING — GO UP',W/2,72);
     ctx.globalAlpha=1;
   }
 
@@ -1710,14 +1710,14 @@ function hud(){
     ctx.textAlign='center'; ctx.fillStyle=C.bone;
     if(MODE==='dm'){
       ctx.font='700 34px "Anton", sans-serif';
-      ctx.fillText('WRACASZ DO GRY',W/2,H/2-8);
+      ctx.fillText('RESPAWNING',W/2,H/2-8);
       ctx.font='600 15px "Barlow Condensed", sans-serif'; ctx.fillStyle='#9A8FA8';
       ctx.fillText(Math.max(1,Math.ceil((140-me.deadT)/60))+' s',W/2,H/2+18);
     } else {
       ctx.font='700 34px "Anton", sans-serif';
-      ctx.fillText('OBSERWUJESZ',W/2,H/2-8);
+      ctx.fillText('SPECTATING',W/2,H/2-8);
       ctx.font='600 15px "Barlow Condensed", sans-serif'; ctx.fillStyle='#9A8FA8';
-      ctx.fillText('R — nowa runda',W/2,H/2+18);
+      ctx.fillText('R — new round',W/2,H/2+18);
     }
   }
   // podpowiedź, dopóki gracz nie odkryje podbicia odrzutem
@@ -1725,7 +1725,7 @@ function hud(){
     const a=Math.min(1,(1500-matchTime)/180)*(0.72+Math.sin(tick*0.08)*0.18);
     ctx.globalAlpha=a; ctx.textAlign='center';
     ctx.font='700 20px "Barlow Condensed", sans-serif'; ctx.fillStyle=C.sun;
-    ctx.fillText('NIE DOSKOCZYSZ? CELUJ W DÓŁ I STRZELAJ — ODRZUT CIĘ PODBIJE',W/2,H-140);
+    ctx.fillText('CAN\'T JUMP HIGH ENOUGH? AIM DOWN AND SHOOT — RECOIL LIFTS YOU UP',W/2,H-140);
     ctx.strokeStyle=C.sun; ctx.lineWidth=2.4; ctx.lineCap='round';
     ctx.beginPath(); ctx.moveTo(W/2,H-130); ctx.lineTo(W/2,H-116);
     ctx.moveTo(W/2-6,H-122); ctx.lineTo(W/2,H-116); ctx.lineTo(W/2+6,H-122); ctx.stroke();
@@ -1866,10 +1866,10 @@ function startGame(){
 function endRound(won){
   gameState='over';
   if(won) wins++;
-  document.getElementById('endTitle').textContent = won?'Zwycięstwo':'Przegrana';
+  document.getElementById('endTitle').textContent = won?'Victory':'Defeat';
   document.getElementById('endBadge').textContent = won
-    ? (MODE==='dm' ? 'Pierwszy do '+DM_TARGET+' trafień' : 'Ostatni żywy na arenie')
-    : (MODE==='dm' ? 'Ktoś dobił limit przed Tobą' : 'Wypadłeś z rundy');
+    ? (MODE==='dm' ? 'First to '+DM_TARGET+' kills' : 'Last one standing')
+    : (MODE==='dm' ? 'Someone reached the limit first' : 'You are out of the round');
   document.getElementById('stKills').textContent = fighters[0].kills;
   const t=Math.floor(matchTime/60);
   document.getElementById('stTime').textContent = Math.floor(t/60)+':'+String(t%60).padStart(2,'0');
@@ -1879,7 +1879,7 @@ function endRound(won){
 
 // ---------- ustawienia jako segmentowane przełączniki ----------
 const BOTOPTS=[3,5,7,9];
-const GOREOPTS=[{v:2,t:'Pełna'},{v:1,t:'Zielona maź'},{v:0,t:'Wyłączona'}];
+const GOREOPTS=[{v:2,t:'Full'},{v:1,t:'Green goo'},{v:0,t:'Off'}];
 
 function buildSeg(host, items, get, set){
   host.innerHTML='';
@@ -1902,24 +1902,24 @@ const segBots =document.getElementById('segBots');
 const segGore =document.getElementById('segGore');
 const segGore2=document.getElementById('segGore2');
 
-buildSeg(segArena, ARENAS.map((a,i)=>({v:i,t:a.name})).concat([{v:ARENAS.length,t:'Losowa'}]),
+buildSeg(segArena, ARENAS.map((a,i)=>({v:i,t:a.name})).concat([{v:ARENAS.length,t:'Random'}]),
          ()=>ARENA, v=>ARENA=v);
-buildSeg(segMode, [{v:'br',t:'Ostatni żywy'},{v:'dm',t:'Rzeź'}], ()=>MODE, v=>MODE=v);
+buildSeg(segMode, [{v:'br',t:'Last standing'},{v:'dm',t:'Deathmatch'}], ()=>MODE, v=>MODE=v);
 buildSeg(segBots, BOTOPTS.map(n=>({v:n,t:String(n)})), ()=>BOTS, v=>BOTS=v);
 buildSeg(segGore, GOREOPTS, ()=>GORE, v=>GORE=v);
 buildSeg(segGore2, GOREOPTS, ()=>GORE, v=>GORE=v);
 
-const LICZ={4:'Czterech',6:'Sześciu',8:'Ośmiu',10:'Dziesięciu'};
+const LICZ={4:'Four',6:'Six',8:'Eight',10:'Ten'};
 function syncOpts(){
   [segArena,segMode,segBots,segGore,segGore2].forEach(paintSeg);
   const losowa = ARENA>=ARENAS.length;
   document.getElementById('arenaHelp').textContent =
-    losowa ? 'Arena losowana przy każdym starcie.' : ARENAS[ARENA].desc;
+    losowa ? 'A random arena is picked at every start.' : ARENAS[ARENA].desc;
   document.getElementById('modeHelp').textContent = MODE==='br'
-    ? 'Jedno życie. Ciecz wzbiera od dołu i wypycha wszystkich na szczyt.'
-    : 'Wracasz do gry po dwóch sekundach. Wygrywa pierwszy z '+DM_TARGET+' trafieniami.';
+    ? 'One life. Liquid rises from below and pushes everyone to the top.'
+    : 'You respawn after two seconds. First to '+DM_TARGET+' kills wins.';
   document.getElementById('botsHelp').textContent =
-    (LICZ[1+BOTS]||(1+BOTS))+' zawodników na arenie, licząc Ciebie.';
+    (LICZ[1+BOTS]||(1+BOTS))+' fighters on the arena, including you.';
 }
 
 document.getElementById('playBtn').onclick=goSetup;

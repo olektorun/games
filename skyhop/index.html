@@ -34,11 +34,44 @@
   .stats b{color:#ffd23f}
   .vol{display:flex;align-items:center;gap:1cqw;font-size:1.6cqw}
   .vol input{width:16cqw;accent-color:#ffd23f}
+
+  /* touch controls */
+  #touch{position:absolute;inset:0;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  #touch[hidden],.tbtn[hidden]{display:none}
+  .tbtn{position:absolute;pointer-events:auto;touch-action:none;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;border:.35cqw solid #000;transition:transform .06s}
+  .tbtn.on{transform:scale(.92)}
+  .tbtn svg{display:block}
+  .tsq{bottom:3cqw;width:10cqw;height:10cqw;border-radius:1.4cqw;background:rgba(255,255,255,.25)}
+  .tsq.on{background:rgba(255,255,255,.5)}
+  .tsq svg{width:55%;height:55%}
+  #tLeft{left:3cqw} #tRight{left:15cqw}
+  .tround{border-radius:50%;font-weight:700;letter-spacing:.05em}
+  #tJump{right:3cqw;bottom:3.5cqw;width:12cqw;height:12cqw;background:#fff;color:#000;font-size:2.3cqw}
+  #tJump.on{background:#d9d9d9}
+  #tFire{right:17cqw;bottom:9cqw;width:9.5cqw;height:9.5cqw;background:radial-gradient(circle at 35% 30%,#ffb04a,#ff4d1a 70%);
+         color:#fff;font-size:1.7cqw;-webkit-text-stroke:.25cqw #000;paint-order:stroke fill}
+  #tFire svg{width:45%;height:45%;margin-bottom:.2cqw}
+  #tFire.on{filter:brightness(1.2)}
 </style>
 </head>
 <body>
 <div id="wrap">
   <canvas id="c" width="960" height="540"></canvas>
+
+  <div id="touch" hidden>
+    <div class="tbtn tsq" id="tLeft" data-k="left" aria-label="Left">
+      <svg viewBox="0 0 100 100"><polygon points="58,14 16,50 58,86 58,64 86,64 86,36 58,36" fill="#fff" stroke="#000" stroke-width="7" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="tbtn tsq" id="tRight" data-k="right" aria-label="Right">
+      <svg viewBox="0 0 100 100"><polygon points="42,14 84,50 42,86 42,64 14,64 14,36 42,36" fill="#fff" stroke="#000" stroke-width="7" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="tbtn tround" id="tJump" data-k="jump">JUMP</div>
+    <div class="tbtn tround" id="tFire" data-k="fire" hidden>
+      <svg viewBox="0 0 100 100"><path d="M22,22 L78,78 M78,22 L22,78" stroke="#000" stroke-width="26" stroke-linecap="round"/><path d="M22,22 L78,78 M78,22 L22,78" stroke="#fff" stroke-width="13" stroke-linecap="round"/></svg>
+      FIRE
+    </div>
+  </div>
 
   <div class="screen" id="title">
     <h1>SKYHOP</h1>
@@ -1162,6 +1195,7 @@ addEventListener('keydown', e => {
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(k)) e.preventDefault();
   if (e.repeat) return;
   kb[k] = true;
+  touchMode = false;
   if (JUMP_KEYS.includes(k) && state === 'play') input.jumpPressed = true;
   if (FIRE_KEYS.includes(k) && state === 'play') input.firePressed = true;
   if (k === 'KeyP' || k === 'Escape') { if (state === 'play') pause(); else if (state === 'pause') resume(); }
@@ -1179,9 +1213,9 @@ function pollInput() {
     const ax = gp.axes[0] || 0, b = i => !!(gp.buttons[i] && gp.buttons[i].pressed);
     gl = ax < -0.35 || b(14); gr = ax > 0.35 || b(15); gj = b(0); gs = b(9); gf = b(2) || b(1);
   }
-  input.left = !!(kb.ArrowLeft || kb.KeyA || gl);
-  input.right = !!(kb.ArrowRight || kb.KeyD || gr);
-  input.jump = JUMP_KEYS.some(k => kb[k]) || gj;
+  input.left = !!(kb.ArrowLeft || kb.KeyA || gl || touch.left);
+  input.right = !!(kb.ArrowRight || kb.KeyD || gr || touch.right);
+  input.jump = JUMP_KEYS.some(k => kb[k]) || gj || touch.jump;
   if (gj && !padJump) {
     if (state === 'play') input.jumpPressed = true;
     else if (state === 'title') startLevel(levelIndex);
@@ -1190,6 +1224,40 @@ function pollInput() {
   if (gf && !padFire && state === 'play') input.firePressed = true;
   if (gs && !padStart) { if (state === 'play') pause(); else if (state === 'pause') resume(); }
   padJump = gj; padStart = gs; padFire = gf;
+}
+
+// ---------- touch controls ----------
+let touchMode = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+const touch = { left: false, right: false, jump: false, fire: false };
+const touchPad = document.getElementById('touch');
+const tbtn = { left: document.getElementById('tLeft'), right: document.getElementById('tRight'),
+               jump: document.getElementById('tJump'), fire: document.getElementById('tFire') };
+// recompute from every finger each time, so a thumb can slide from ← to → without lifting
+function readTouches(e) {
+  e.preventDefault();
+  touchMode = true;
+  const now = { left: false, right: false, jump: false, fire: false };
+  for (const t of e.touches) {
+    const el = document.elementFromPoint(t.clientX, t.clientY), b = el && el.closest('.tbtn');
+    if (b && !b.hidden) now[b.dataset.k] = true;
+  }
+  for (const k in now) {
+    if (now[k] && !touch[k] && state === 'play') {
+      if (k === 'jump') input.jumpPressed = true;
+      if (k === 'fire') input.firePressed = true;
+    }
+    touch[k] = now[k];
+    tbtn[k].classList.toggle('on', now[k]);
+  }
+}
+for (const ev of ['touchstart', 'touchmove', 'touchend', 'touchcancel']) touchPad.addEventListener(ev, readTouches, { passive: false });
+addEventListener('touchstart', () => { touchMode = true; }, { passive: true });
+
+function syncTouchUi() {
+  const on = touchMode && state === 'play';
+  if (touchPad.hidden === on) touchPad.hidden = !on;
+  const fire = on && p.fire && !p.dead;
+  if (tbtn.fire.hidden === fire) tbtn.fire.hidden = !fire;
 }
 
 // ---------- progress ----------
@@ -1286,6 +1354,7 @@ function frame(ts) {
   let n = 0;
   while (acc >= STEP && n < 5) { step(); acc -= STEP; n++; }
   render();
+  syncTouchUi();
 }
 
 // debug hook for tuning the feel from the console

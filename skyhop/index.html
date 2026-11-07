@@ -817,7 +817,7 @@ const LEVELS = [
     b.cannon(138, 15);
     b.goal(144);
   } },
-  { id: '5-5', name: 'SKY DRAGON', world: 5, w: 100, sky: SKYK_NIGHT, final: true, build(b) {
+  { id: '5-5', name: 'SUN PHOENIX', world: 5, w: 100, sky: SKYK_NIGHT, final: true, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
     b.cannon(22, 15);
@@ -828,7 +828,7 @@ const LEVELS = [
     b.enemy('spiky', 46);
     b.q(56, 13, 'heart'); b.big(56, 9);
     b.check(64);
-    b.sign(66, 'Stomp the dragon when it lands!');
+    b.sign(66, 'Stomp the phoenix when it lands!');
     b.ground(70, 99); b.fill(99, 99, 0, 15);
     b.plat(74, 77, 13); b.plat(92, 95, 13);
     b.big(75, 10);
@@ -836,7 +836,7 @@ const LEVELS = [
     b.boss('dragon', 85);
   } },
 
-  // unlocked after the final boss: the old world-3 boss, still the hardest fight
+  // unlocked after the Sun Phoenix: the old world-3 boss, still the hardest fight
   { id: 'BONUS', name: 'STORM KING', world: 6, w: 100, sky: STORM_RED, bonus: true, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
@@ -1044,7 +1044,7 @@ const BOSSES = {
   king: { name: 'STORM KING', w: 60, h: 72 },
   yeti: { name: 'FROST YETI', w: 70, h: 80 },
   knight: { name: 'IRON KNIGHT', w: 52, h: 70 },
-  dragon: { name: 'SKY DRAGON', w: 92, h: 60 }
+  dragon: { name: 'SUN PHOENIX', w: 92, h: 60 }
 };
 const isFlyer = b => b.kind === 'king' || b.kind === 'dragon';
 function makeBoss(kind, tx) {
@@ -2444,36 +2444,66 @@ function drawKnight(b, ph) {
 }
 
 function drawDragon(b, ph) {
-  const tired = b.mode === 'tired', flap = tired ? 0.2 : Math.sin(tick * 0.2);
-  const body = ph === 1 ? '#8a5cd6' : ph === 2 ? '#d6587a' : '#e8563c';
+  // Sun Phoenix: a fire bird whose flames get hotter (orange, pink, blue) each phase
+  const tired = b.mode === 'tired', flap = tired ? -0.6 : Math.sin(tick * 0.18);
+  const [hot, mid, pale] = ph === 1 ? ['#ff6a1a', '#ffb02e', '#fff1a8'] : ph === 2 ? ['#ff3d6e', '#ff8aa8', '#ffe0ea'] : ['#2f8cff', '#7fd0ff', '#eaf8ff'];
+  const glow = ph === 1 ? '255,170,60' : ph === 2 ? '255,90,140' : '90,180,255';
   ctx.save(); ctx.scale(b.face, 1);
-  // wings
-  ctx.fillStyle = '#ffd27a'; ctx.strokeStyle = '#5a2a1a'; ctx.lineWidth = 2.5;
-  ctx.beginPath(); ctx.moveTo(-6, -40); ctx.lineTo(-30, -40 - 34 * flap - 10); ctx.lineTo(-56, -44 - 20 * flap); ctx.lineTo(-30, -30); ctx.closePath(); ctx.fill(); ctx.stroke();
-  // tail
-  ctx.strokeStyle = body; ctx.lineWidth = 10; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(-30, -22); ctx.quadraticCurveTo(-56, -14 + Math.sin(tick * 0.1) * 6, -62, -30); ctx.stroke();
-  ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.moveTo(-62, -38); ctx.lineTo(-70, -28); ctx.lineTo(-58, -24); ctx.fill();
-  // body
-  ctx.fillStyle = body; ctx.strokeStyle = '#2a0f20'; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.ellipse(-6, -24, 30, 20, 0, 0, 6.283); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#ffe2a8'; ctx.beginPath(); ctx.ellipse(-2, -18, 18, 10, 0, 0, 6.283); ctx.fill();
-  // neck and head
-  ctx.fillStyle = body;
-  ctx.beginPath(); ctx.ellipse(22, -40, 10, 18, 0.5, 0, 6.283); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(34, -54, 16, 12, 0, 0, 6.283); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#ffd23f';
-  ctx.beginPath(); ctx.moveTo(26, -64); ctx.lineTo(22, -78); ctx.lineTo(32, -66); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(34, -66); ctx.lineTo(34, -80); ctx.lineTo(40, -66); ctx.fill();
-  if (tired) {
-    ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(34, -58); ctx.lineTo(42, -54); ctx.moveTo(42, -58); ctx.lineTo(34, -54); ctx.stroke();
-  } else {
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(38, -57, 4, 4, 0, 0, 6.283); ctx.fill();
-    ctx.fillStyle = '#1b1b2f'; ctx.beginPath(); ctx.arc(39, -57, 2, 0, 6.283); ctx.fill();
+  const aura = ctx.createRadialGradient(0, -34, 8, 0, -34, 80);
+  aura.addColorStop(0, `rgba(${glow},${tired ? 0.15 : 0.4})`); aura.addColorStop(1, `rgba(${glow},0)`);
+  ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(0, -34, 80, 0, 6.283); ctx.fill();
+  // flame tail: three long feathers waving behind
+  for (let i = 0; i < 3; i++) {
+    const wav = Math.sin(tick * 0.15 + i) * 8, len = 46 + i * 10;
+    ctx.fillStyle = i === 1 ? mid : hot;
+    ctx.beginPath(); ctx.moveTo(-18, -30 + i * 4);
+    ctx.quadraticCurveTo(-18 - len * 0.6, -40 + i * 10 + wav, -18 - len, -22 + i * 12 + wav);
+    ctx.quadraticCurveTo(-18 - len * 0.5, -20 + i * 6 + wav * 0.5, -14, -22 + i * 3);
+    ctx.closePath(); ctx.fill();
   }
-  ctx.fillStyle = '#2a0f20'; ctx.fillRect(44, -50, 6, 2);
+  // back wing
+  const wing = (dx, s, col) => {
+    ctx.fillStyle = col; ctx.strokeStyle = 'rgba(60,20,10,.55)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(dx, -40);
+    ctx.quadraticCurveTo(dx - 20 * s, -76 * s - flap * 26, dx - 58 * s, -66 * s - flap * 34);
+    for (let k = 0; k < 4; k++) ctx.lineTo(dx - (50 - k * 12) * s, (-50 - flap * 24 + k * 6) * s + 4 + k * 3);
+    ctx.lineTo(dx - 6, -28); ctx.closePath(); ctx.fill(); ctx.stroke();
+  };
+  wing(4, 0.85, hot);
+  // body
+  ctx.fillStyle = mid; ctx.strokeStyle = 'rgba(60,20,10,.6)'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.ellipse(0, -30, 24, 16, -0.15, 0, 6.283); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = pale; ctx.beginPath(); ctx.ellipse(6, -26, 13, 9, -0.2, 0, 6.283); ctx.fill();
+  // legs tucked under
+  ctx.strokeStyle = '#7a3a10'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-4, -16); ctx.lineTo(-6, tired ? -2 : -8); ctx.moveTo(6, -16); ctx.lineTo(8, tired ? -2 : -8); ctx.stroke();
+  // neck and head
+  ctx.fillStyle = mid; ctx.strokeStyle = 'rgba(60,20,10,.6)'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.ellipse(24, -44 + (tired ? 10 : 0), 13, 11, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+  const hy = tired ? 10 : 0;
+  // flame crest
+  ctx.fillStyle = hot;
+  for (let i = 0; i < 3; i++) {
+    const w = Math.sin(tick * 0.25 + i) * 3;
+    ctx.beginPath(); ctx.moveTo(18 + i * 3, -52 + hy); ctx.quadraticCurveTo(10 + i * 4 + w, -70 - i * 3 + hy, 6 + i * 6 + w, -78 - i * 2 + hy);
+    ctx.quadraticCurveTo(18 + i * 4, -64 + hy, 24 + i * 2, -52 + hy); ctx.fill();
+  }
+  // beak
+  ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#7a3a10'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(34, -47 + hy); ctx.lineTo(46, -42 + hy); ctx.lineTo(34, -39 + hy); ctx.closePath(); ctx.fill(); ctx.stroke();
+  if (tired) {
+    ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(25, -46 + hy); ctx.lineTo(31, -42 + hy); ctx.moveTo(31, -46 + hy); ctx.lineTo(25, -42 + hy); ctx.stroke();
+  } else {
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(28, -46, 4, 4, 0, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#1b1b2f'; ctx.beginPath(); ctx.arc(29.5, -46, 2, 0, 6.283); ctx.fill();
+  }
+  // front wing over the body
+  wing(-2, 1, mid);
   ctx.restore();
-  if (tired) for (let i = 0; i < 3; i++) { const a = tick * 0.08 + i * 2.1; ctx.fillStyle = '#ffe14d'; starPath(b.face * 34 + Math.cos(a) * 18, -88 + Math.sin(a) * 5, 5, 2.2); ctx.fill(); }
+  // embers drifting off
+  if (!tired && tick % 3 === 0) parts.push({ x: b.x + b.w / 2 + (Math.random() - .5) * 60, y: b.y + b.h / 2, vx: (Math.random() - .5), vy: -0.8 - Math.random(), life: 26, max: 26, r: 2.2, col: glow, g: -0.01 });
+  if (tired) for (let i = 0; i < 3; i++) { const a = tick * 0.08 + i * 2.1; ctx.fillStyle = '#ffe14d'; starPath(b.face * 26 + Math.cos(a) * 18, -78 + Math.sin(a) * 5, 5, 2.2); ctx.fill(); }
 }
 
 function drawPlayer() {

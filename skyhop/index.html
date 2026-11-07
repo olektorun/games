@@ -16,7 +16,7 @@
   .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
           gap:1.8cqw;text-align:center;background:rgba(13,27,42,.55);backdrop-filter:blur(3px);padding:3cqw}
   .screen[hidden]{display:none}
-  h1{margin:0;font-size:10cqw;font-weight:700;letter-spacing:.02em;line-height:1;
+  h1{margin:0;font-size:7.5cqw;font-weight:700;letter-spacing:.02em;line-height:1;
      text-shadow:0 .6cqw 0 #2b6cb0,0 1.2cqw 2cqw rgba(0,0,0,.3)}
   h2{margin:0;font-size:6cqw;font-weight:700;text-shadow:0 .4cqw 0 #2b6cb0}
   p{margin:0;font-size:1.8cqw;opacity:.9}
@@ -137,7 +137,7 @@ const overlap = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h 
 
 // ---------- tiles ----------
 const EMPTY = 0, SOLID = 1, ONEWAY = 2, QBLOCK = 3, USED = 4, FAKE = 5,
-      CRUMBLE = 6, SPIKE = 7, LAVA = 8, BLINK_A = 9, BLINK_B = 10;
+      CRUMBLE = 6, SPIKE = 7, LAVA = 8, BLINK_A = 9, BLINK_B = 10, ICE = 11, CANNON = 12;
 
 // ---------- worlds ----------
 const WORLDS = {
@@ -149,7 +149,13 @@ const WORLDS = {
        plank: ['#5d5480', '#8a80b8', '#2d2740'] },
   3: { name: 'Storm Castle', bg: 'castle',
        ground: { body: '#59606f', dot: '#474d5b', edge: '#262a35', top: ['#7c8494', '#5d6574', '#a7aebd'] },
-       plank: ['#4a4f5e', '#80889a', '#262a35'] }
+       plank: ['#4a4f5e', '#80889a', '#262a35'] },
+  4: { name: 'Frozen Peaks', bg: 'ice',
+       ground: { body: '#6d7f99', dot: '#5a6b84', edge: '#34445a', top: ['#e6f3fb', '#c9e1f0', '#ffffff'] },
+       plank: ['#a9d8f0', '#e6f7ff', '#5a86a8'] },
+  5: { name: 'Sky Kingdom', bg: 'sky',
+       ground: { body: '#e9dcb8', dot: '#d8c79a', edge: '#b0904e', top: ['#ffffff', '#e8ecf6', '#ffffff'] },
+       plank: ['#ffffff', '#ffffff', '#c9d0e4'] }
 };
 
 // ---------- levels ----------
@@ -160,6 +166,10 @@ const CAVE = { g: ['#120f24', '#211a3d', '#2f2550'], rock: ['#2a2346', '#1d1834'
 const CAVE_DEEP = { g: ['#08070f', '#120f22', '#1a1530'], rock: ['#1e1a33', '#141125'], glow: '190,120,255' };
 const STORM = { g: ['#1a1f2e', '#2e3548', '#4a5368'], towers: ['#2a3040', '#1c212d'], moon: '#dfe6f0' };
 const STORM_RED = { g: ['#1c1424', '#3a2236', '#6a3a3a'], towers: ['#2c2030', '#1d1520'], moon: '#ffd2b0' };
+const SNOW = { g: ['#7fb2e0', '#bfe0f5', '#f2fbff'], peaks: ['#cfe1f0', '#a5c2da'], sun: '#fffbe8' };
+const SNOW_DUSK = { g: ['#4a5a9a', '#b08ab8', '#ffd0b8'], peaks: ['#b6aed0', '#8c86b0'], sun: '#ffe6c8' };
+const SKYK = { g: ['#ff9f5a', '#ffd29a', '#fff3d6'], sea: ['#fff6ea', '#ffe6c4'], sun: '#fff8d0' };
+const SKYK_NIGHT = { g: ['#2a1f5a', '#7a4a8a', '#ffb88a'], sea: ['#e8d8f0', '#c8b0d8'], sun: '#ffe0b0' };
 
 const LEVELS = [
   { id: '1-1', name: 'GREEN START', world: 1, w: 160, sky: SKY_DAY, build(b) {
@@ -572,6 +582,257 @@ const LEVELS = [
     b.big(75, 10);
     b.arena(70, 99);
     b.boss('king', 85);
+  } },
+
+  { id: '4-1', name: 'ICY SLOPES', world: 4, w: 150, sky: SNOW, build(b) {
+    b.ground(0, 20); b.ice(8, 20, G);
+    b.sign(3, 'Ice is slippery!');
+    b.q(6, 13, 'heart');
+    b.enemy('slider', 15);
+    b.ground(24, 45); b.ice(28, 38, G);
+    b.fill(27, 27, 13, 15); b.ice(30, 34, 10); b.coinRow(30, 34, 9); b.big(32, 8);
+    b.icicle(31, 11); b.icicle(33, 11);
+    b.enemy('blob', 36);
+    b.q(41, 13, 'fire');
+    b.ice(48, 50, 14); b.ice(53, 55, 12); b.coin(49, 13); b.coin(54, 11);
+    b.ground(58, 90);
+    b.check(60);
+    b.enemy('slider', 66); b.enemy('slider', 72);
+    b.fill(78, 78, 6, 12); b.fill(82, 82, 6, 15);
+    b.coin(80, 12); b.coin(80, 9); b.big(80, 4);
+    b.mplat(93, 13, 3, 48, 0, 0.03);
+    b.ice(100, 101, 12);
+    b.ground(104, 149);
+    b.fill(108, 108, 13, 15); b.ice(110, 120, 11); b.big(115, 9);
+    b.icicle(112, 12); b.icicle(115, 12); b.icicle(118, 12);
+    b.q(124, 13, 'star');
+    b.enemy('slider', 130); b.enemy('blob', 135);
+    b.goal(144);
+  } },
+  { id: '4-2', name: 'BLIZZARD PASS', world: 4, w: 150, sky: SNOW, build(b) {
+    b.ground(0, 16); b.ice(6, 16, G);
+    b.q(5, 13, 'heart');
+    b.enemy('blob', 12);
+    b.mplat(19, 14, 3, 48, 0, 0.025);
+    b.ice(25, 27, 13); b.big(26, 10);
+    b.ground(30, 52);
+    b.enemy('slider', 36);
+    b.fill(40, 43, 14, 15); b.ice(40, 43, 13);
+    b.q(46, 13, 'fire');
+    b.enemy('buzzer', 48, 10, { range: 70 });
+    b.ice(55, 56, 13); b.ice(59, 60, 11); b.ice(63, 64, 13);
+    b.coin(55, 12); b.coin(59, 10); b.coin(63, 12);
+    b.ground(67, 100);
+    b.check(69);
+    b.enemy('slider', 75); b.enemy('spiky', 80);
+    b.spring(85); b.ice(87, 92, 9); b.coinRow(87, 91, 8); b.big(92, 7);
+    b.q(96, 13, 'coin');
+    b.mplat(103, 13, 2, 0, 48, 0.03); b.mplat(107, 11, 2, 0, 48, 0.03); b.big(107, 8);
+    b.ground(111, 149);
+    b.fill(116, 116, 13, 15); b.ice(118, 126, 10);
+    b.icicle(119, 11); b.icicle(122, 11); b.icicle(125, 11);
+    b.enemy('slider', 130); b.q(132, 13, 'star'); b.enemy('slider', 136);
+    b.goal(144);
+  } },
+  { id: '4-3', name: 'GLACIER CLIMB', world: 4, w: 140, sky: SNOW, build(b) {
+    b.ground(0, 34);
+    b.q(6, 13, 'heart');
+    b.enemy('slider', 14);
+    b.fill(26, 26, 4, 12); b.fill(30, 30, 4, 15);
+    b.coin(28, 12); b.coin(28, 9); b.coin(28, 6); b.big(28, 2);
+    b.ice(37, 39, 13); b.ice(42, 44, 11); b.ice(47, 48, 13);
+    b.coin(38, 12); b.coin(43, 10); b.coin(47, 12);
+    b.enemy('buzzer', 42, 8, { range: 60 });
+    b.ground(50, 72);
+    b.check(52);
+    b.fill(58, 61, 13, LH - 1); b.fill(62, 65, 10, LH - 1); b.fill(66, 72, 7, LH - 1);
+    b.ice(66, 72, 7); b.big(70, 4);
+    b.enemy('slider', 69, 7);
+    b.ground(73, 110);
+    b.enemy('blob', 78); b.enemy('slider', 84);
+    b.q(88, 13, 'fire');
+    b.fill(94, 94, 6, 12); b.fill(98, 98, 6, 15);
+    b.coin(96, 12); b.coin(96, 9); b.big(96, 4);
+    b.mplat(113, 13, 3, 48, 0, 0.03);
+    b.ground(119, 139);
+    b.enemy('spiky', 125); b.enemy('slider', 130);
+    b.goal(134);
+  } },
+  { id: '4-4', name: 'FROZEN LAKE', world: 4, w: 150, sky: SNOW_DUSK, build(b) {
+    b.ground(0, 14);
+    b.sign(3, 'Icy water — do not fall in');
+    b.q(5, 13, 'heart');
+    b.lava(15, 40);
+    b.ice(17, 19, 15); b.ice(22, 24, 14); b.mplat(27, 15, 3, 48, 0, 0.03); b.ice(33, 35, 14); b.ice(38, 40, 15);
+    b.coin(18, 14); b.coin(23, 13); b.coin(34, 13); b.coin(39, 14); b.big(28, 12);
+    b.enemy('buzzer', 30, 11, { range: 80 });
+    b.ground(41, 62);
+    b.check(43);
+    b.enemy('slider', 50); b.enemy('slider', 55);
+    b.q(58, 13, 'fire');
+    b.lava(63, 87);
+    b.ice(65, 66, 14); b.ice(69, 70, 12); b.ice(73, 74, 14); b.ice(77, 78, 12); b.ice(81, 82, 14); b.ice(85, 86, 13);
+    b.coin(65, 13); b.coin(69, 11); b.coin(73, 13); b.coin(81, 13); b.big(77, 9);
+    b.ground(88, 120);
+    b.enemy('blob', 94); b.enemy('spiky', 100);
+    b.spring(105); b.ice(107, 112, 9); b.coinRow(107, 111, 8); b.big(112, 7);
+    b.q(115, 13, 'star');
+    b.lava(121, 128);
+    b.mplat(123, 14, 3, 32, 0, 0.03);
+    b.ground(129, 149);
+    b.enemy('slider', 135); b.enemy('slider', 139);
+    b.goal(144);
+  } },
+  { id: '4-5', name: 'FROST YETI', world: 4, w: 100, sky: SNOW_DUSK, build(b) {
+    b.ground(0, 30);
+    b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
+    b.enemy('slider', 20); b.enemy('blob', 26);
+    b.lava(31, 34); b.ice(32, 33, 15); b.big(33, 12);
+    b.ground(35, 69);
+    b.enemy('slider', 46);
+    b.q(56, 13, 'heart'); b.big(56, 9);
+    b.check(64);
+    b.sign(66, 'Stomp the Yeti! Floor is icy');
+    b.ground(70, 99); b.fill(99, 99, 0, 15); b.ice(71, 98, G);
+    b.plat(74, 77, 13); b.plat(92, 95, 13);
+    b.big(75, 10);
+    b.arena(70, 99);
+    b.boss('yeti', 88);
+  } },
+
+  { id: '5-1', name: 'CLOUD GATES', world: 5, w: 150, sky: SKYK, build(b) {
+    b.ground(0, 20);
+    b.sign(3, 'Wind pushes you in the air');
+    b.q(6, 13, 'heart');
+    b.enemy('blob', 14);
+    b.wind(21, 30, 8, 15, 1, 0);
+    b.plat(25, 26, 13); b.big(25, 10);
+    b.ground(31, 55);
+    b.q(36, 13, 'fire');
+    b.cannon(45, 15);
+    b.enemy('hopper', 50);
+    b.wind(56, 69, 6, 15, -1, 0);
+    b.plat(58, 59, 13); b.plat(62, 63, 12); b.plat(66, 67, 13);
+    b.coin(58, 12); b.coin(66, 12); b.big(62, 9);
+    b.ground(70, 100);
+    b.check(72);
+    b.cannon(82, 15);
+    b.enemy('buzzer', 88, 10, { range: 70 });
+    b.spring(94); b.plat(96, 100, 9); b.coinRow(96, 99, 8); b.big(100, 7);
+    b.mplat(103, 13, 3, 48, 0, 0.03); b.mplat(110, 12, 3, 0, 48, 0.03);
+    b.ground(115, 149);
+    b.cannon(125, 15);
+    b.q(128, 13, 'star');
+    b.enemy('hopper', 132); b.enemy('blob', 136);
+    b.goal(144);
+  } },
+  { id: '5-2', name: 'UPDRAFT TOWERS', world: 5, w: 150, sky: SKYK, build(b) {
+    b.ground(0, 24);
+    b.sign(3, 'Jump into rising air to fly up');
+    b.q(6, 13, 'heart');
+    b.enemy('blob', 12); b.enemy('hopper', 18);
+    b.wind(25, 29, 2, LH - 1, 0, -1);
+    b.coin(27, 12); b.coin(27, 9); b.coin(27, 6);
+    b.fill(30, 36, 6, LH - 1); b.big(33, 3);
+    b.ground(37, 60);
+    b.cannon(44, 15);
+    b.q(48, 13, 'fire');
+    b.check(52);
+    b.enemy('spiky', 56);
+    b.wind(61, 74, 8, 15, 1, 0);
+    b.plat(64, 65, 13); b.plat(69, 70, 13);
+    b.coin(64, 12); b.coin(69, 12);
+    b.ground(75, 100);
+    b.enemy('hopper', 80);
+    b.wind(86, 87, 2, 15, 0, -1);
+    b.plat(88, 92, 5); b.coinRow(88, 91, 4); b.big(91, 3);
+    b.enemy('buzzer', 95, 10, { range: 60 });
+    b.mplat(103, 13, 3, 48, 0, 0.03);
+    b.fill(109, 110, 12, LH - 1); b.big(110, 9);
+    b.mplat(113, 12, 2, 0, 32, 0.03);
+    b.ground(116, 149);
+    b.cannon(124, 15);
+    b.enemy('blob', 130);
+    b.q(134, 13, 'star');
+    b.enemy('hopper', 138);
+    b.goal(144);
+  } },
+  { id: '5-3', name: 'BULLET BRIDGE', world: 5, w: 150, sky: SKYK, build(b) {
+    b.ground(0, 40);
+    b.q(6, 13, 'heart');
+    b.cannon(20, 15);
+    b.q(26, 13, 'fire');
+    b.cannon(32, 15);
+    b.coinRow(23, 29, 12);
+    b.plat(43, 45, 13); b.big(44, 10);
+    b.ground(49, 70);
+    b.check(52);
+    b.fill(58, 58, 14, 15); b.cannon(58, 13);
+    b.enemy('blob', 64);
+    b.wind(71, 80, 6, 15, 1, 0);
+    b.plat(75, 76, 13);
+    b.ground(81, 110);
+    b.cannon(90, 15);
+    b.fill(94, 96, 13, 15); b.big(95, 10);
+    b.enemy('hopper', 98);
+    b.cannon(102, 15);
+    b.enemy('spiky', 106);
+    b.wind(113, 115, 3, LH - 1, 0, -1);
+    b.plat(117, 121, 6); b.coinRow(117, 120, 5); b.big(119, 4);
+    b.ground(122, 149);
+    b.cannon(130, 15);
+    b.enemy('blob', 135);
+    b.q(138, 13, 'star');
+    b.goal(144);
+  } },
+  { id: '5-4', name: 'STORM SPIRE', world: 5, w: 150, sky: SKYK_NIGHT, build(b) {
+    b.ground(0, 20);
+    b.q(6, 13, 'heart');
+    b.enemy('spiky', 14);
+    b.blink(23, 25, 13, 'a'); b.blink(28, 30, 13, 'b'); b.crumble(33, 34, 14);
+    b.big(24, 10);
+    b.ground(36, 56);
+    b.q(40, 13, 'fire');
+    b.cannon(44, 15);
+    b.enemy('hopper', 50);
+    b.check(54);
+    b.wind(57, 61, 2, LH - 1, 0, -1);
+    b.coin(59, 12); b.coin(59, 8);
+    b.fill(62, 66, 5, LH - 1); b.big(64, 2);
+    b.ground(67, 90);
+    b.enemy('blob', 72);
+    b.cannon(80, 15);
+    b.spikes(84, 86);
+    b.enemy('buzzer', 88, 10, { range: 50 });
+    b.wind(91, 107, 6, 15, -1, 0);
+    b.mplat(94, 13, 3, 48, 0, 0.03);
+    b.plat(100, 101, 12); b.big(100, 9);
+    b.blink(104, 106, 13, 'a');
+    b.ground(108, 149);
+    b.cannon(116, 15);
+    b.enemy('hopper', 122);
+    b.q(126, 13, 'star');
+    b.enemy('spiky', 132);
+    b.cannon(138, 15);
+    b.goal(144);
+  } },
+  { id: '5-5', name: 'SKY DRAGON', world: 5, w: 100, sky: SKYK_NIGHT, build(b) {
+    b.ground(0, 30);
+    b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
+    b.cannon(22, 15);
+    b.enemy('hopper', 26);
+    b.wind(31, 34, 6, 15, 1, 0);
+    b.plat(32, 33, 13); b.big(33, 10);
+    b.ground(35, 69);
+    b.enemy('spiky', 46);
+    b.q(56, 13, 'heart'); b.big(56, 9);
+    b.check(64);
+    b.sign(66, 'Stomp the dragon when it lands!');
+    b.ground(70, 99); b.fill(99, 99, 0, 15);
+    b.plat(74, 77, 13); b.plat(92, 95, 13);
+    b.big(75, 10);
+    b.arena(70, 99);
+    b.boss('dragon', 85);
   } }
 ];
 
@@ -587,7 +848,7 @@ function loadLevel(i) {
     q: {}, bumps: {}, plats: [], goal: null, start: { x: 3 * T, y: G * T },
     arena: null, boss: null, bossX: 0, bossKind: null,
     waves: [], fires: [], shots: [], drops: [], bolts: [], texts: [], fly: [],
-    crumb: {}, blink: { phase: 0, t: 0, hold: new Set() }, reveal: 0
+    crumb: {}, blink: { phase: 0, t: 0, hold: new Set() }, reveal: 0, winds: [], cannons: []
   };
   const fill = (x0, x1, y0, y1, v = SOLID) => {
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) lv.grid[y][x] = v;
@@ -602,6 +863,10 @@ function loadLevel(i) {
     spikes: (x0, x1, y = G - 1) => fill(x0, x1, y, y, SPIKE),
     lava: (x0, x1) => fill(x0, x1, G + 1, LH - 1, LAVA),
     blink: (x0, x1, y, k) => fill(x0, x1, y, y, k === 'a' ? BLINK_A : BLINK_B),
+    ice: (x0, x1, y) => fill(x0, x1, y, y, ICE),
+    icicle: (x, y) => lv.drops.push({ x: x * T + T / 2, y: y * T, vy: 0, warn: -1, ice: true }),
+    wind: (x0, x1, y0, y1, dx, dy) => lv.winds.push({ x: x0 * T, y: y0 * T, w: (x1 - x0 + 1) * T, h: (y1 - y0 + 1) * T, dx, dy }),
+    cannon: (x, y) => { lv.grid[y][x] = CANNON; lv.cannons.push({ tx: x, ty: y, t: 60 }); },
     coin: (x, y) => lv.coins.push({ x: x * T + T / 2, y: y * T + T / 2, got: false, ph: hash(x, y) * 6 }),
     coinRow(x0, x1, y) { for (let x = x0; x <= x1; x++) this.coin(x, y); },
     big: (x, y) => lv.big.push({ x: x * T + T / 2, y: y * T + T / 2, got: false }),
@@ -626,7 +891,7 @@ function tileAt(tx, ty) {
 }
 function solidAt(tx, ty) {
   const t = tileAt(tx, ty);
-  if (t === SOLID || t === QBLOCK || t === USED || t === CRUMBLE) return true;
+  if (t === SOLID || t === QBLOCK || t === USED || t === CRUMBLE || t === ICE || t === CANNON) return true;
   if (t === BLINK_A || t === BLINK_B) return (t === BLINK_A) === (L.blink.phase === 0) && !L.blink.hold.has(tx + ',' + ty);
   return false;
 }
@@ -647,7 +912,7 @@ function groundBelow(x) {
 }
 
 // ---------- enemies ----------
-const ESIZE = { blob: [24, 20], hopper: [22, 22], buzzer: [26, 18], spiky: [26, 20], mini: [18, 14], spitter: [24, 26], chaser: [26, 26] };
+const ESIZE = { blob: [24, 20], hopper: [22, 22], buzzer: [26, 18], spiky: [26, 20], mini: [18, 14], spitter: [24, 26], chaser: [26, 26], slider: [26, 22], bullet: [26, 18] };
 function makeEnemy(type, tx, ty, opt) {
   const [w, h] = ESIZE[type];
   const x = tx * T + T / 2 - w / 2, y = ty * T - h;
@@ -690,6 +955,12 @@ function updateEnemy(e) {
     if (e.dying > (e.flip ? 90 : 30)) e.dead = true;
     return;
   }
+  if (e.type === 'bullet') {
+    // flies straight until it hits something; never sleeps
+    e.t++; e.age = (e.age || 0) + 1; e.x += e.dir * 3.2;
+    if (e.age > 420 || solidBox(e.x, e.y, e.w, e.h)) { e.dead = true; sparkle(e.x + e.w / 2, e.y + e.h / 2, '90,90,110'); }
+    return;
+  }
   if (Math.abs(e.x - (cam.x + VW / 2)) > VW) return;   // sleep until close to the screen
   e.t++;
   if (e.type === 'buzzer') {
@@ -713,6 +984,14 @@ function updateEnemy(e) {
       e.wait = 0; e.mouth = 14; sfx('spit');
       L.shots.push({ x: e.x + e.w / 2 + e.dir * 12, y: e.y + 11, vx: e.dir * 3.4, vy: 0, grav: 0, r: 6, life: 220, kind: 'goo' });
     }
+  } else if (e.type === 'slider') {
+    // waddles slowly, then belly-slides fast when you are close and level with it
+    if (e.wait > 0) e.wait--;
+    if (e.dash > 0) e.dash--;
+    else if (e.wait === 0 && e.grounded && Math.abs(p.x - e.x) < 260 && Math.abs(p.y - e.y) < 40) { e.dash = 70; e.wait = 120; e.dir = Math.sign(p.x - e.x) || -1; }
+    e.vx = e.dir * (e.dash > 0 ? 4 : 0.6);
+    moveBody(e);
+    if (e.hitWall || (e.grounded && !groundAhead(e) && !e.dash)) e.dir *= -1;
   } else if (e.type === 'chaser') {
     // creeps toward you only while you face away from it
     const dx = p.x + p.w / 2 - (e.x + e.w / 2), dy = p.y + p.h / 2 - (e.y + e.h / 2);
@@ -743,14 +1022,17 @@ function killEnemy(e, flip) {
 const BOSSES = {
   blob: { name: 'BIG BLOB', w: 76, h: 60 },
   golem: { name: 'CRYSTAL GOLEM', w: 72, h: 84 },
-  king: { name: 'STORM KING', w: 60, h: 72 }
+  king: { name: 'STORM KING', w: 60, h: 72 },
+  yeti: { name: 'FROST YETI', w: 70, h: 80 },
+  dragon: { name: 'SKY DRAGON', w: 92, h: 60 }
 };
+const isFlyer = b => b.kind === 'king' || b.kind === 'dragon';
 function makeBoss(kind, tx) {
   const d = BOSSES[kind];
   return {
-    kind, name: d.name, x: tx * T, y: kind === 'king' ? 5 * T : G * T - d.h, w: d.w, h: d.h,
+    kind, name: d.name, x: tx * T, y: kind === 'king' || kind === 'dragon' ? 5 * T : G * T - d.h, w: d.w, h: d.h,
     vx: 0, vy: 0, hp: 6, t: 0, at: 0, inv: 0, jumps: 0, attacks: 0, tired: 0,
-    grounded: false, active: false, dead: 0, squash: 0, face: -1, mode: kind === 'king' ? 'fly' : 'walk', landed: false
+    grounded: false, active: false, dead: 0, squash: 0, face: -1, mode: kind === 'king' || kind === 'dragon' ? 'fly' : 'walk', landed: false, tx: 0, ty: 0
   };
 }
 function bossPhase(b) { return b.hp > 4 ? 1 : b.hp > 2 ? 2 : 3; }
@@ -769,6 +1051,8 @@ function updateBoss(b) {
   const ph = bossPhase(b);
   if (b.kind === 'blob') updateBlobBoss(b, ph);
   else if (b.kind === 'golem') updateGolem(b, ph);
+  else if (b.kind === 'yeti') updateYeti(b, ph);
+  else if (b.kind === 'dragon') updateDragon(b, ph);
   else updateKing(b, ph);
 }
 
@@ -860,6 +1144,90 @@ function updateKing(b, ph) {
   }
 }
 
+function throwAt(b, n, kind) {
+  const sx = b.x + b.w / 2, sy = b.y + 10;
+  for (let i = 0; i < n; i++) {
+    const tx = p.x + p.w / 2 + (i - (n - 1) / 2) * 70;
+    L.shots.push({ x: sx, y: sy, vx: clamp((tx - sx) / 56, -6, 6), vy: -8.5, grav: 0.3, r: 7, life: 200, kind });
+  }
+  sfx('spit');
+}
+function dropIcicles(n) {
+  L.drops.push({ x: p.x + p.w / 2, y: 3 * T, vy: 0, warn: 50, ice: true });
+  for (let i = 1; i < n; i++) L.drops.push({ x: arenaLeft() + 40 + Math.random() * (arenaRight() - arenaLeft() - 80), y: 3 * T, vy: 0, warn: 40 + i * 12, ice: true });
+}
+
+function updateYeti(b, ph) {
+  moveBody(b, 0.6);
+  const toP = Math.sign(p.x + p.w / 2 - (b.x + b.w / 2)) || b.face;
+  if (b.mode === 'walk') {
+    b.face = toP; b.vx = b.face * [0, 0.8, 1.1, 1.4][ph];
+    if (++b.t > [0, 90, 75, 60][ph]) {
+      b.t = 0; b.at = 0; b.attacks++; b.face = toP;
+      b.mode = ph === 1 ? 'throw' : b.attacks % 2 === 0 ? 'charge' : ph === 3 && b.attacks % 3 === 0 ? 'stomp' : 'throw';
+    }
+  } else if (b.mode === 'throw') {
+    b.vx = 0; b.face = toP;
+    if (++b.at === 22) throwAt(b, ph, 'snow');
+    if (b.at > 44) b.mode = 'walk';
+  } else if (b.mode === 'charge') {
+    // short wind-up, then a fast run until he slams into a wall
+    if (++b.at < 32) b.vx = 0;
+    else {
+      b.vx = b.face * 6.5;
+      if (b.hitWall) { b.mode = 'dizzy'; b.at = 0; shake = Math.max(shake, 10); sfx('boom'); dropIcicles(1 + ph); }
+    }
+  } else if (b.mode === 'dizzy') {
+    b.vx = 0;
+    if (++b.at > 70) b.mode = 'walk';
+  } else if (b.mode === 'stomp') {
+    b.vx = 0; b.at++;
+    if (b.at === 12 && b.grounded) { b.vy = -8; b.landed = false; }
+    if (b.at > 14 && b.grounded && !b.landed) { b.landed = true; b.squash = 1; shake = Math.max(shake, 9); sfx('boom'); dropIcicles(4); }
+    if (b.at > 70) b.mode = 'walk';
+  }
+}
+
+function updateDragon(b, ph) {
+  const cx = (arenaLeft() + arenaRight()) / 2;
+  if (b.mode === 'fly') {
+    b.t++;
+    const tx = cx + Math.sin(b.t * 0.014) * ((arenaRight() - arenaLeft()) / 2 - 100) - b.w / 2;
+    const ty = 4.5 * T + Math.sin(b.t * 0.06) * 16;
+    b.x += (tx - b.x) * 0.05; b.y += (ty - b.y) * 0.08;
+    b.face = Math.sign(p.x - b.x) || 1;
+    if (++b.at > [0, 100, 85, 70][ph]) {
+      b.at = 0; b.attacks++;
+      // a fan of fireballs aimed at you
+      const n = [0, 3, 5, 5][ph], sx = b.x + b.w / 2 + b.face * 30, sy = b.y + 30;
+      const a0 = Math.atan2(p.y + p.h / 2 - sy, p.x + p.w / 2 - sx);
+      for (let i = 0; i < n; i++) {
+        const a = a0 + (i - (n - 1) / 2) * 0.22;
+        L.shots.push({ x: sx, y: sy, vx: Math.cos(a) * 3.6, vy: Math.sin(a) * 3.6, grav: 0, r: 7, life: 260, kind: 'flame' });
+      }
+      sfx('fire');
+      if (ph === 3 && b.attacks % 2 === 1) {
+        for (const side of [-1, 1]) {
+          const m = makeEnemy('bullet', 0, 0, { dir: -side });
+          m.x = side < 0 ? arenaLeft() + 4 : arenaRight() - 30; m.y = G * T - 40; m.summoned = true;
+          L.enemies.push(m);
+        }
+      }
+      if (b.attacks % 3 === 0) { b.mode = 'swoop'; b.tx = p.x + p.w / 2 - b.w / 2; }
+    }
+  } else if (b.mode === 'swoop') {
+    // dives at where you were standing and crash-lands
+    const dx = b.tx - b.x;
+    b.x += clamp(dx * 0.08, -6, 6); b.y += 6;
+    if (b.y + b.h >= G * T) { b.y = G * T - b.h; b.mode = 'tired'; b.tired = 150; shake = Math.max(shake, 8); sfx('boom'); b.squash = 1; }
+  } else if (b.mode === 'tired') {
+    if (--b.tired <= 0) b.mode = 'rise';
+  } else if (b.mode === 'rise') {
+    b.y -= 3;
+    if (b.y < 4.5 * T) { b.mode = 'fly'; b.at = 0; }
+  }
+}
+
 function hitBoss(b) {
   b.hp--; b.inv = 50; b.squash = 1;
   shake = Math.max(shake, 6); sfx('stomp');
@@ -870,7 +1238,7 @@ function hitBoss(b) {
     sfx('win');
     return;
   }
-  if (b.kind === 'king') b.mode = 'rise';
+  if (isFlyer(b)) b.mode = 'rise';
   if (b.kind === 'blob' && (b.hp === 4 || b.hp === 3)) {     // phase 2: splits off small blobs
     for (const d of [-1, 1]) {
       const m = makeEnemy('mini', 0, 0, { dir: d });
@@ -1036,6 +1404,7 @@ function respawnPlayer() {
   p.inv = 90;
   // ghosts go back home, otherwise one waiting at the checkpoint kills you over and over
   for (const e of L.enemies) if (e.type === 'chaser' && !e.dying) { e.x = e.x0; e.y = e.y0; e.vx = 0; e.vy = 0; }
+  L.enemies = L.enemies.filter(e => e.type !== 'bullet');
   // dying in the boss room resets the fight
   if (L.arena && L.arena.on && L.boss && !L.boss.dead) {
     L.arena.on = false;
@@ -1058,7 +1427,10 @@ function updatePlayer() {
   // right after a wall-jump, ignore steering back into that wall
   if (p.lockT > 0) { p.lockT--; if (ix === p.lockDir) ix = 0; }
 
-  const accel = p.grounded ? 0.5 : 0.34, turn = p.grounded ? 1.0 : 0.45, decel = p.grounded ? 0.6 : 0.08;
+  // ice under the feet: slow to start, slow to stop
+  let onIce = false;
+  if (p.grounded) for (let tx = Math.floor(p.x / T); tx <= Math.floor((p.x + p.w - 0.01) / T); tx++) if (tileAt(tx, Math.floor((p.y + p.h + 1) / T)) === ICE) onIce = true;
+  const accel = onIce ? 0.16 : p.grounded ? 0.5 : 0.34, turn = onIce ? 0.35 : p.grounded ? 1.0 : 0.45, decel = onIce ? 0.07 : p.grounded ? 0.6 : 0.08;
   if (ix !== 0) {
     if (p.vx * ix < 0) p.vx += ix * turn;
     else if (Math.abs(p.vx) < RUN) p.vx = Math.min(RUN, Math.abs(p.vx) + accel) * ix;
@@ -1096,6 +1468,12 @@ function updatePlayer() {
   if (!p.grounded && p.vy > 0 && ix !== 0 && touchingWall(ix)) {
     p.vy = Math.min(p.vy, SLIDE); p.sliding = true; p.face = ix;
     if (tick % 5 === 0) dust(ix > 0 ? p.x + p.w : p.x, p.y + p.h - 4, 1);
+  }
+  for (const wz of L.winds) {
+    if (!overlap(p, wz)) continue;
+    p.vx = clamp(p.vx + wz.dx * 0.32, -7, 7);
+    // rising air cancels gravity and lifts steadily, jump held or not
+    if (wz.dy) { p.vy = Math.max(p.vy - g + wz.dy * 0.55, -6.5); p.grounded = false; }
   }
   p.vy = Math.min(p.vy, MAXFALL);
 
@@ -1144,11 +1522,11 @@ function updatePlayer() {
   }
   const b = L.boss;
   if (b && b.active && !b.dead && b.inv === 0 && overlap(p, b)) {
-    const canHit = b.kind !== 'king' || b.mode === 'tired';
+    const canHit = !isFlyer(b) || b.mode === 'tired';
     if (canHit && preVy > 0 && preBottom <= b.y + 18) {
       hitBoss(b); p.vy = input.jump ? -12 : -9.5; p.y = b.y - p.h;
     } else if (canHit && p.star > 0) { hitBoss(b); p.vx = -p.face * 5; }
-    else if (!(b.kind === 'king' && b.mode === 'tired')) hurt();   // a resting king is harmless
+    else if (!(isFlyer(b) && b.mode === 'tired')) hurt();   // a resting flyer is harmless
   }
   for (const w of L.waves) {
     if (Math.abs(p.x + p.w / 2 - w.x) < 14 && p.y + p.h > w.y - 22) hurt();
@@ -1269,7 +1647,21 @@ function updateWorld() {
   }
   L.shots = L.shots.filter(s => s.life > 0 && s.y < LH * T);
 
+  for (const c of L.cannons) {
+    const cx = c.tx * T + T / 2;
+    if (Math.abs(cx - (cam.x + VW / 2)) > VW * 0.6 || p.dead) continue;
+    if (++c.t > 150 && Math.abs(p.x + p.w / 2 - cx) > 50) {
+      c.t = 0; c.flash = 10;
+      const dir = Math.sign(p.x + p.w / 2 - cx) || -1, m = makeEnemy('bullet', 0, 0, { dir });
+      m.x = dir > 0 ? c.tx * T + T + 1 : c.tx * T - m.w - 1; m.y = c.ty * T + 7;
+      L.enemies.push(m); sfx('boom');
+    }
+    if (c.flash > 0) c.flash--;
+  }
+
   for (const d of L.drops) {
+    // icicles hang until you walk underneath
+    if (d.warn < 0) { if (!p.dead && Math.abs(p.x + p.w / 2 - d.x) < 56 && p.y > d.y && p.y - d.y < 420) d.warn = 26; continue; }
     if (d.warn > 0) { d.warn--; if (tick % 4 === 0) parts.push({ x: d.x + (Math.random() - .5) * 10, y: d.y, vx: 0, vy: 1, life: 14, max: 14, r: 1.6, col: '150,140,190', g: 0.1 }); continue; }
     d.vy = Math.min(d.vy + 0.6, 12); d.y += d.vy;
     if (nearPlayer(d.x, d.y + 14, 16, 26)) { hurt(); d.dead = true; }
@@ -1367,6 +1759,8 @@ function drawBackground() {
   ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
   if (W.bg === 'meadow') bgMeadow(S);
   else if (W.bg === 'cave') bgCave(S);
+  else if (W.bg === 'ice') bgIce(S);
+  else if (W.bg === 'sky') bgSky(S);
   else bgCastle(S);
 }
 
@@ -1469,6 +1863,62 @@ function towers(par, col, base, seed) {
   }
 }
 
+function bgIce(S) {
+  const sx = VW * 0.75 - cam.x * 0.02;
+  ctx.fillStyle = 'rgba(255,255,240,.3)'; ctx.beginPath(); ctx.arc(sx, 100, 64, 0, 6.283); ctx.fill();
+  ctx.fillStyle = S.sun; ctx.beginPath(); ctx.arc(sx, 100, 38, 0, 6.283); ctx.fill();
+  peaks(0.15, S.peaks[0], 380, 1, 210);
+  peaks(0.35, S.peaks[1], 440, 2, 150);
+  // snowfall
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  for (let i = 0; i < 90; i++) {
+    const x = ((hash(i, 2) * VW + Math.sin(tick * 0.01 + i) * 30 - cam.x * 0.2) % VW + VW) % VW;
+    const y = (hash(i, 6) * VH + tick * (0.6 + hash(i, 8))) % VH;
+    ctx.beginPath(); ctx.arc(x, y, 1 + hash(i, 1) * 2, 0, 6.283); ctx.fill();
+  }
+}
+function peaks(par, col, base, seed, hMax) {
+  const ox = cam.x * par, by = base - cam.y * par * 0.5, step = 220;
+  for (let i = Math.floor(ox / step) - 1; i < Math.floor((ox + VW) / step) + 2; i++) {
+    const x = i * step - ox, h = 90 + hash(i, seed) * hMax, w = 260 + hash(i, seed + 1) * 120, px = x + w * 0.5;
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.moveTo(x - 40, by + 200); ctx.lineTo(px, by - h); ctx.lineTo(x + w + 40, by + 200); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.beginPath(); ctx.moveTo(px, by - h); ctx.lineTo(px + 34, by - h + 46); ctx.lineTo(px + 12, by - h + 38);
+    ctx.lineTo(px - 6, by - h + 50); ctx.lineTo(px - 32, by - h + 44); ctx.closePath(); ctx.fill();
+  }
+  ctx.fillStyle = col; ctx.fillRect(0, by + 200, VW, VH);
+}
+function bgSky(S) {
+  const sx = VW * 0.5 - cam.x * 0.02, sy = 130;
+  // slow-turning sun rays
+  ctx.save(); ctx.translate(sx, sy); ctx.rotate(tick * 0.001);
+  ctx.fillStyle = 'rgba(255,255,255,.12)';
+  for (let i = 0; i < 12; i++) { ctx.rotate(Math.PI / 6); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-40, -700); ctx.lineTo(40, -700); ctx.fill(); }
+  ctx.restore();
+  ctx.fillStyle = 'rgba(255,255,230,.4)'; ctx.beginPath(); ctx.arc(sx, sy, 80, 0, 6.283); ctx.fill();
+  ctx.fillStyle = S.sun; ctx.beginPath(); ctx.arc(sx, sy, 48, 0, 6.283); ctx.fill();
+  // floating islands far away
+  for (let i = 0; i < 5; i++) {
+    const span = VW + 300, x = (((hash(i, 4) * 2000 - cam.x * 0.12) % span) + span) % span - 150, y = 160 + hash(i, 5) * 140, w = 60 + hash(i, 6) * 70;
+    ctx.fillStyle = 'rgba(150,110,90,.35)';
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w * 0.5, y + w * 0.6); ctx.fill();
+    ctx.fillStyle = 'rgba(120,180,110,.45)'; ctx.fillRect(x, y - 5, w, 6);
+  }
+  cloudSea(0.25, S.sea[0], 400, 1);
+  cloudSea(0.5, S.sea[1], 470, 2);
+}
+function cloudSea(par, col, base, seed) {
+  const ox = cam.x * par, by = base - cam.y * par * 0.5;
+  ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, VH);
+  for (let x = -60; x <= VW + 60; x += 60) {
+    const i = Math.floor((x + ox) / 60), fx = i * 60 - ox, r = 30 + hash(i, seed) * 26;
+    ctx.arc(fx + 30, by - r * 0.4, r, Math.PI, 0);
+  }
+  ctx.lineTo(VW, VH); ctx.closePath(); ctx.fill();
+  ctx.fillRect(0, by, VW, VH);
+}
+
 // ---------- drawing: tiles ----------
 const looksSolid = t => t === SOLID || t === FAKE;
 function drawGround(tx, ty, x, y) {
@@ -1490,7 +1940,7 @@ function drawGround(tx, ty, x, y) {
   if (!looksSolid(tileAt(tx, ty - 1))) {
     ctx.fillStyle = S.top[0]; ctx.fillRect(x, y, T, 10);
     ctx.fillStyle = S.top[1];
-    if (W.bg === 'meadow') for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(x + 4 + i * 8, y + 10, 4, 0, Math.PI); ctx.fill(); }
+    if (W.bg === 'meadow' || W.bg === 'sky' || W.bg === 'ice') for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(x + 4 + i * 8, y + 10, 4, 0, Math.PI); ctx.fill(); }
     else ctx.fillRect(x, y + 8, T, 3);
     ctx.fillStyle = S.top[2]; ctx.fillRect(x, y, T, 3);
     if (W.bg === 'meadow' && hash(tx, ty + 5) > 0.6) {
@@ -1558,6 +2008,27 @@ function drawTiles() {
       for (let i = 0; i < 4; i++) {
         ctx.beginPath(); ctx.moveTo(x + i * 8, y + T - 6); ctx.lineTo(x + i * 8 + 4, y + 10); ctx.lineTo(x + i * 8 + 8, y + T - 6);
         ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    } else if (t === ICE) {
+      ctx.fillStyle = '#9fd6f2'; ctx.fillRect(x, y, T, T);
+      ctx.fillStyle = '#d8f2ff'; ctx.fillRect(x, y, T, 5);
+      ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 2; ctx.beginPath();
+      ctx.moveTo(x + 6, y + 24); ctx.lineTo(x + 16, y + 10); ctx.moveTo(x + 16, y + 28); ctx.lineTo(x + 26, y + 14); ctx.stroke();
+      ctx.strokeStyle = '#4f86a8'; ctx.lineWidth = 1.5; ctx.strokeRect(x + 0.75, y + 0.75, T - 1.5, T - 1.5);
+    } else if (t === CANNON) {
+      const c = L.cannons.find(q => q.tx === tx && q.ty === ty), f = c && c.flash > 0 ? c.flash / 10 : 0;
+      ctx.fillStyle = '#2a2d3a'; ctx.beginPath(); ctx.roundRect(x + 1, y + 2, T - 2, T - 2, 6); ctx.fill();
+      ctx.fillStyle = '#4a4f62'; ctx.fillRect(x + 4, y + 6, T - 8, 5);
+      ctx.fillStyle = '#ffd23f'; ctx.fillRect(x + 3, y + T - 9, T - 6, 4);
+      ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(x + 6, y + 16, 5, 0, 6.283); ctx.arc(x + T - 6, y + 16, 5, 0, 6.283); ctx.fill();
+      if (f) { ctx.fillStyle = `rgba(255,200,90,${f})`; ctx.beginPath(); ctx.arc(x + T / 2, y + 16, 14, 0, 6.283); ctx.fill(); }
+    } else if (t === LAVA && W.bg === 'ice') {
+      // in the frozen world the deadly liquid is freezing water
+      const surface = tileAt(tx, ty - 1) !== LAVA;
+      ctx.fillStyle = surface ? '#3f8fd0' : '#1f5a8f'; ctx.fillRect(x, y + (surface ? 6 : 0), T, T - (surface ? 6 : 0));
+      if (surface) {
+        ctx.fillStyle = '#bfe6ff'; ctx.fillRect(x, y + 6 + Math.sin(tick * 0.05 + tx) * 1.5, T, 3);
+        if (hash(tx, 3) > 0.6) { ctx.fillStyle = '#eaf7ff'; ctx.fillRect(x + 6 + hash(tx, 5) * 14, y + 5, 10, 4); }
       }
     } else if (t === LAVA) {
       const surface = tileAt(tx, ty - 1) !== LAVA;
@@ -1731,6 +2202,25 @@ function drawEnemy(e) {
     const open = e.mouth > 0 ? 6 : 3;
     ctx.fillStyle = '#3a1660'; ctx.beginPath(); ctx.ellipse(e.dir * 9, -12, 4, open, 0, 0, 6.283); ctx.fill();
     eyesAt(e.dir * 1, -17, e.dir);
+  } else if (e.type === 'slider') {
+    const slide = e.dash > 0;
+    ctx.save(); if (slide) { ctx.translate(0, -6); ctx.rotate(e.dir * 1.35); ctx.translate(0, 6); }
+    ctx.fillStyle = '#ffb13b'; ctx.fillRect(-8, -3, 6, 3); ctx.fillRect(2, -3, 6, 3);
+    ctx.fillStyle = '#26314a'; ctx.strokeStyle = '#0f1424'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(0, -11, 11, 11, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#f2f6ff'; ctx.beginPath(); ctx.ellipse(e.dir * 2, -9, 7, 8, 0, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#ffb13b'; ctx.beginPath(); ctx.moveTo(e.dir * 9, -14); ctx.lineTo(e.dir * 15, -12); ctx.lineTo(e.dir * 9, -10); ctx.fill();
+    eyesAt(e.dir * 3, -15, e.dir);
+    ctx.fillStyle = '#e8463c'; ctx.fillRect(-10, -6, 20, 3);
+    ctx.restore();
+  } else if (e.type === 'bullet') {
+    ctx.fillStyle = '#1c1e28'; ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(e.dir * 2, -9, 12, 8, 0, 0, 6.283); ctx.fill();
+    ctx.fillRect(-e.dir * 13 - 2, -16, 4, 14);
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(e.dir * 5, -11, 3, 3.6, 0, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(e.dir * 6, -11, 1.6, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(e.dir * 2, -6); ctx.lineTo(e.dir * 8, -5); ctx.stroke();
+    if (e.t % 4 < 2) parts.push({ x: e.x + e.w / 2 - e.dir * 16, y: e.y + 9, vx: -e.dir * 0.5, vy: 0, life: 14, max: 14, r: 3, col: '200,200,210', g: -0.02 });
   } else if (e.type === 'chaser') {
     const bob = Math.sin(e.t * 0.08) * 2;
     ctx.globalAlpha *= e.shy ? 0.55 : 0.9;
@@ -1765,6 +2255,8 @@ function drawBoss(b) {
   ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, 0, b.w / 2, 6, 0, 0, 6.283); ctx.fill();
   if (b.kind === 'blob') drawBlobBoss(b, ph, air);
   else if (b.kind === 'golem') drawGolem(b, ph);
+  else if (b.kind === 'yeti') drawYeti(b, ph);
+  else if (b.kind === 'dragon') drawDragon(b, ph);
   else drawKing(b, ph);
   ctx.restore();
 }
@@ -1840,6 +2332,65 @@ function drawKing(b, ph) {
   }
 }
 
+function drawYeti(b, ph) {
+  const step = b.mode === 'walk' || b.mode === 'charge' ? Math.sin(tick * (b.mode === 'charge' ? 0.4 : 0.15)) * 3 : 0;
+  ctx.fillStyle = '#dfe9f5'; ctx.strokeStyle = '#4a5a74'; ctx.lineWidth = 3;
+  ctx.fillRect(-24, -16 + Math.max(0, step), 16, 16); ctx.fillRect(8, -16 + Math.max(0, -step), 16, 16);
+  ctx.beginPath(); ctx.ellipse(0, -44, 34, 32, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+  const arm = b.mode === 'throw' && b.at < 24 ? -22 : 0;
+  ctx.beginPath(); ctx.ellipse(-36, -42 + arm, 9, 20, 0.3, 0, 6.283); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(36, -42 + arm, 9, 20, -0.3, 0, 6.283); ctx.fill(); ctx.stroke();
+  // horns
+  ctx.fillStyle = ph === 3 ? '#ff8a8a' : '#c9b38a';
+  ctx.beginPath(); ctx.moveTo(-20, -68); ctx.lineTo(-30, -86); ctx.lineTo(-10, -72); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(20, -68); ctx.lineTo(30, -86); ctx.lineTo(10, -72); ctx.fill();
+  // face
+  ctx.fillStyle = '#7aa6d6'; ctx.beginPath(); ctx.ellipse(b.face * 6, -50, 18, 14, 0, 0, 6.283); ctx.fill();
+  if (b.mode === 'dizzy') {
+    ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 2;
+    for (const ex of [-6, 8]) { ctx.beginPath(); ctx.arc(b.face * 6 + ex, -54, 4, 0, 5); ctx.stroke(); }
+    for (let i = 0; i < 3; i++) { const a = tick * 0.1 + i * 2.1; ctx.fillStyle = '#ffe14d'; starPath(Math.cos(a) * 26, -88 + Math.sin(a) * 5, 5, 2.2); ctx.fill(); }
+  } else {
+    ctx.fillStyle = '#fff'; ctx.fillRect(b.face * 6 - 10, -57, 7, 6); ctx.fillRect(b.face * 6 + 3, -57, 7, 6);
+    ctx.fillStyle = '#1b1b2f'; ctx.fillRect(b.face * 6 - 8 + b.face * 2, -55, 3, 3); ctx.fillRect(b.face * 6 + 5 + b.face * 2, -55, 3, 3);
+  }
+  ctx.fillStyle = '#1b1b2f'; ctx.fillRect(b.face * 6 - 7, -44, 14, 4);
+  ctx.fillStyle = '#fff'; ctx.fillRect(b.face * 6 - 6, -44, 3, 3); ctx.fillRect(b.face * 6 + 3, -44, 3, 3);
+}
+
+function drawDragon(b, ph) {
+  const tired = b.mode === 'tired', flap = tired ? 0.2 : Math.sin(tick * 0.2);
+  const body = ph === 1 ? '#8a5cd6' : ph === 2 ? '#d6587a' : '#e8563c';
+  ctx.save(); ctx.scale(b.face, 1);
+  // wings
+  ctx.fillStyle = '#ffd27a'; ctx.strokeStyle = '#5a2a1a'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(-6, -40); ctx.lineTo(-30, -40 - 34 * flap - 10); ctx.lineTo(-56, -44 - 20 * flap); ctx.lineTo(-30, -30); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // tail
+  ctx.strokeStyle = body; ctx.lineWidth = 10; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-30, -22); ctx.quadraticCurveTo(-56, -14 + Math.sin(tick * 0.1) * 6, -62, -30); ctx.stroke();
+  ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.moveTo(-62, -38); ctx.lineTo(-70, -28); ctx.lineTo(-58, -24); ctx.fill();
+  // body
+  ctx.fillStyle = body; ctx.strokeStyle = '#2a0f20'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.ellipse(-6, -24, 30, 20, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ffe2a8'; ctx.beginPath(); ctx.ellipse(-2, -18, 18, 10, 0, 0, 6.283); ctx.fill();
+  // neck and head
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.ellipse(22, -40, 10, 18, 0.5, 0, 6.283); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(34, -54, 16, 12, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ffd23f';
+  ctx.beginPath(); ctx.moveTo(26, -64); ctx.lineTo(22, -78); ctx.lineTo(32, -66); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(34, -66); ctx.lineTo(34, -80); ctx.lineTo(40, -66); ctx.fill();
+  if (tired) {
+    ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(34, -58); ctx.lineTo(42, -54); ctx.moveTo(42, -58); ctx.lineTo(34, -54); ctx.stroke();
+  } else {
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(38, -57, 4, 4, 0, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#1b1b2f'; ctx.beginPath(); ctx.arc(39, -57, 2, 0, 6.283); ctx.fill();
+  }
+  ctx.fillStyle = '#2a0f20'; ctx.fillRect(44, -50, 6, 2);
+  ctx.restore();
+  if (tired) for (let i = 0; i < 3; i++) { const a = tick * 0.08 + i * 2.1; ctx.fillStyle = '#ffe14d'; starPath(b.face * 34 + Math.cos(a) * 18, -88 + Math.sin(a) * 5, 5, 2.2); ctx.fill(); }
+}
+
 function drawPlayer() {
   if (p.dead) return;
   if (p.inv > 0 && Math.floor(p.inv / 4) % 2) return;
@@ -1878,7 +2429,14 @@ function drawEffects() {
     ctx.beginPath(); ctx.moveTo(w.x - 6, w.y); ctx.quadraticCurveTo(w.x, w.y - 18, w.x + 6, w.y); ctx.fill();
   }
   for (const s of L.shots) {
-    if (s.kind === 'shard') {
+    if (s.kind === 'snow') {
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = '#8fb3d6'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r + 1, 0, 6.283); ctx.fill(); ctx.stroke();
+    } else if (s.kind === 'flame') {
+      ctx.fillStyle = 'rgba(255,120,30,.4)'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r + 5, 0, 6.283); ctx.fill();
+      ctx.fillStyle = '#ff7a1f'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+      ctx.fillStyle = '#ffe07a'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 0.45, 0, 6.283); ctx.fill();
+    } else if (s.kind === 'shard') {
       ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(tick * 0.3);
       ctx.fillStyle = '#7fe6ff'; ctx.strokeStyle = '#1c4a60'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(0, -9); ctx.lineTo(5, 0); ctx.lineTo(0, 9); ctx.lineTo(-5, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -1891,13 +2449,31 @@ function drawEffects() {
   }
   for (const d of L.drops) {
     const shakeX = d.warn > 0 ? (Math.random() - .5) * 3 : 0;
-    ctx.fillStyle = '#8a80b8'; ctx.strokeStyle = '#231e36'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(d.x - 9 + shakeX, d.y); ctx.lineTo(d.x + shakeX, d.y + 30); ctx.lineTo(d.x + 9 + shakeX, d.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+    const armed = d.warn < 0, sx2 = armed ? 0 : shakeX;
+    ctx.fillStyle = d.ice ? '#cdeeff' : '#8a80b8'; ctx.strokeStyle = d.ice ? '#4f86a8' : '#231e36'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(d.x - 9 + sx2, d.y); ctx.lineTo(d.x + sx2, d.y + 30); ctx.lineTo(d.x + 9 + sx2, d.y); ctx.closePath(); ctx.fill(); ctx.stroke();
     if (d.warn > 0) {
       const gy = groundBelow(d.x);
       ctx.fillStyle = `rgba(0,0,0,${0.15 + (1 - d.warn / 60) * 0.25})`;
       ctx.beginPath(); ctx.ellipse(d.x, gy, 14, 4, 0, 0, 6.283); ctx.fill();
     }
+  }
+  // wind: streaks drifting the way the air pushes
+  ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+  for (const wz of L.winds) {
+    if (wz.x > cam.x + VW || wz.x + wz.w < cam.x) continue;
+    const n = Math.ceil(wz.w * wz.h / 2600);
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      if (wz.dy) {
+        const x = wz.x + hash(i, 3) * wz.w, y = wz.y + wz.h - ((hash(i, 7) * wz.h + tick * 5) % wz.h);
+        ctx.moveTo(x, y); ctx.lineTo(x, y + 18);
+      } else {
+        const x = wz.x + ((hash(i, 3) * wz.w + tick * 4 * wz.dx) % wz.w + wz.w) % wz.w, y = wz.y + hash(i, 7) * wz.h;
+        ctx.moveTo(x, y); ctx.lineTo(x - wz.dx * 22, y);
+      }
+    }
+    ctx.stroke();
   }
   for (const bo of L.bolts) {
     const gy = groundBelow(bo.x), top = cam.y - 10;
@@ -2104,7 +2680,7 @@ function show(name) { for (const k in scr) scr[k].hidden = k !== name; }
 function buildLevelButtons() {
   const box = $('levelBtns'); box.innerHTML = '';
   const current = Math.min(unlocked, LEVELS.length - 1);
-  for (const w of [1, 2, 3]) {
+  for (const w of [1, 2, 3, 4, 5]) {
     const row = document.createElement('div'); row.className = 'wrow';
     const name = document.createElement('span'); name.className = 'wname'; name.textContent = WORLDS[w].name;
     row.appendChild(name);

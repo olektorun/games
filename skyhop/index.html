@@ -567,7 +567,7 @@ const LEVELS = [
     b.enemy('blob', 150);
     b.goal(155);
   } },
-  { id: '3-5', name: 'STORM KING', world: 3, w: 100, sky: STORM_RED, build(b) {
+  { id: '3-5', name: 'IRON KNIGHT', world: 3, w: 100, sky: STORM_RED, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
     b.enemy('chaser', 20, 9); b.enemy('spiky', 26);
@@ -576,12 +576,12 @@ const LEVELS = [
     b.enemy('spitter', 46);
     b.q(56, 13, 'heart'); b.big(56, 9);
     b.check(64);
-    b.sign(66, 'Stomp him when he gets tired!');
+    b.sign(66, 'Stomp his helmet — mind the sword!');
     b.ground(70, 99); b.fill(99, 99, 0, 15);
     b.plat(74, 77, 13); b.plat(92, 95, 13);
     b.big(75, 10);
     b.arena(70, 99);
-    b.boss('king', 85);
+    b.boss('knight', 88);
   } },
 
   { id: '4-1', name: 'ICY SLOPES', world: 4, w: 150, sky: SNOW, build(b) {
@@ -1024,6 +1024,7 @@ const BOSSES = {
   golem: { name: 'CRYSTAL GOLEM', w: 72, h: 84 },
   king: { name: 'STORM KING', w: 60, h: 72 },
   yeti: { name: 'FROST YETI', w: 70, h: 80 },
+  knight: { name: 'IRON KNIGHT', w: 52, h: 70 },
   dragon: { name: 'SKY DRAGON', w: 92, h: 60 }
 };
 const isFlyer = b => b.kind === 'king' || b.kind === 'dragon';
@@ -1052,6 +1053,7 @@ function updateBoss(b) {
   if (b.kind === 'blob') updateBlobBoss(b, ph);
   else if (b.kind === 'golem') updateGolem(b, ph);
   else if (b.kind === 'yeti') updateYeti(b, ph);
+  else if (b.kind === 'knight') updateKnight(b, ph);
   else if (b.kind === 'dragon') updateDragon(b, ph);
   else updateKing(b, ph);
 }
@@ -1185,6 +1187,41 @@ function updateYeti(b, ph) {
     if (b.at === 12 && b.grounded) { b.vy = -8; b.landed = false; }
     if (b.at > 14 && b.grounded && !b.landed) { b.landed = true; b.squash = 1; shake = Math.max(shake, 9); sfx('boom'); dropIcicles(4); }
     if (b.at > 70) b.mode = 'walk';
+  }
+}
+
+// mid-game boss: walks up, swings a sword when you are close, leaps onto you from afar
+function knightSword(b) {
+  const x0 = b.x + b.w / 2 + b.face * 8, x1 = b.x + b.w / 2 + b.face * 74;
+  return { x: Math.min(x0, x1), y: b.y + 8, w: Math.abs(x1 - x0), h: 46 };
+}
+function updateKnight(b, ph) {
+  moveBody(b, 0.6);
+  const dx = p.x + p.w / 2 - (b.x + b.w / 2), toP = Math.sign(dx) || b.face;
+  if (b.mode === 'walk') {
+    b.face = toP; b.vx = b.face * [0, 0.9, 1.2, 1.5][ph];
+    if (b.grounded && Math.abs(dx) < 100 && Math.abs(p.y + p.h - (b.y + b.h)) < 60) { b.mode = 'swing'; b.at = 0; }
+    else if (++b.t > [0, 120, 95, 75][ph]) { b.t = 0; b.at = 0; b.mode = ph === 3 ? 'axe' : 'leap'; }
+  } else if (b.mode === 'swing') {
+    // the raised, flashing sword is the warning; the strike comes a moment later
+    b.vx = 0; b.at++;
+    if (b.at === 28) sfx('fire');
+    if (b.at >= 28 && b.at < 38 && overlap(p, knightSword(b))) hurt();
+    if (b.at > 54) b.mode = 'walk';
+  } else if (b.mode === 'axe') {
+    b.vx = 0; b.face = toP;
+    if (++b.at === 18) throwAt(b, 2, 'axe');
+    if (b.at > 36) { b.mode = 'leap'; b.at = 0; }
+  } else if (b.mode === 'leap') {
+    if (b.at++ === 0) { b.vy = -12; b.vx = clamp(dx / 40, -6, 6); b.landed = false; b.face = toP; }
+    if (b.at > 3 && b.grounded && !b.landed) {
+      b.landed = true; b.vx = 0; b.squash = 1; shake = Math.max(shake, 7); sfx('boom');
+      if (ph >= 2) for (const d of [-1, 1]) L.waves.push({ x: d < 0 ? b.x - 10 : b.x + b.w + 10, y: b.y + b.h, dir: d, sp: 3.2, life: 120 });
+      b.mode = 'rest'; b.at = 0;
+    }
+  } else if (b.mode === 'rest') {
+    b.vx = 0;
+    if (++b.at > [0, 50, 40, 30][ph]) b.mode = 'walk';
   }
 }
 
@@ -2256,6 +2293,7 @@ function drawBoss(b) {
   if (b.kind === 'blob') drawBlobBoss(b, ph, air);
   else if (b.kind === 'golem') drawGolem(b, ph);
   else if (b.kind === 'yeti') drawYeti(b, ph);
+  else if (b.kind === 'knight') drawKnight(b, ph);
   else if (b.kind === 'dragon') drawDragon(b, ph);
   else drawKing(b, ph);
   ctx.restore();
@@ -2358,6 +2396,34 @@ function drawYeti(b, ph) {
   ctx.fillStyle = '#fff'; ctx.fillRect(b.face * 6 - 6, -44, 3, 3); ctx.fillRect(b.face * 6 + 3, -44, 3, 3);
 }
 
+function drawKnight(b, ph) {
+  const step = b.mode === 'walk' ? Math.sin(tick * 0.18) * 3 : 0, f = b.face;
+  ctx.fillStyle = '#3d4250'; ctx.strokeStyle = '#14161e'; ctx.lineWidth = 2.5;
+  ctx.fillRect(-16, -16 + Math.max(0, step), 12, 16); ctx.fillRect(4, -16 + Math.max(0, -step), 12, 16);
+  // body armour
+  ctx.fillStyle = '#9aa3b5'; ctx.beginPath(); ctx.roundRect(-20, -48, 40, 34, 6); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = ph === 3 ? '#c0392b' : ph === 2 ? '#d68a1c' : '#2e6fd0'; ctx.fillRect(-20, -34, 40, 6);
+  // helmet with plume: the spot to stomp
+  ctx.fillStyle = '#b8c0d0'; ctx.beginPath(); ctx.roundRect(-16, -72, 32, 26, 8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#14161e'; ctx.fillRect(f > 0 ? -2 : -14, -62, 16, 4);
+  ctx.fillStyle = '#ffd23f'; ctx.fillRect(f > 0 ? 2 : -10, -61, 4, 2); ctx.fillRect(f > 0 ? 8 : -4, -61, 4, 2);
+  ctx.fillStyle = '#e8463c'; ctx.beginPath(); ctx.moveTo(-4, -72); ctx.quadraticCurveTo(-f * 20, -94 + Math.sin(tick * 0.2) * 2, -f * 26, -70); ctx.lineTo(4, -72); ctx.fill();
+  // shield on the back arm
+  ctx.fillStyle = '#5a6274'; ctx.beginPath(); ctx.moveTo(-f * 20, -50); ctx.lineTo(-f * 32, -46); ctx.lineTo(-f * 32, -24); ctx.lineTo(-f * 22, -16); ctx.lineTo(-f * 20, -50); ctx.fill(); ctx.stroke();
+  // sword: raised and flashing while winding up, swung forward on the strike
+  const winding = b.mode === 'swing' && b.at < 28, striking = b.mode === 'swing' && b.at >= 28 && b.at < 38;
+  ctx.save(); ctx.translate(f * 18, -38);
+  ctx.rotate(winding ? -f * 1.9 : striking ? f * 0.1 : -f * 0.6);
+  ctx.fillStyle = '#6b4a2a'; ctx.fillRect(-3, -3, 6 * f, 6);
+  ctx.fillStyle = winding && Math.floor(tick / 3) % 2 ? '#ffffff' : '#dfe6f0'; ctx.strokeStyle = '#14161e'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(4 * f, -4); ctx.lineTo(54 * f, -2); ctx.lineTo(60 * f, 0); ctx.lineTo(54 * f, 2); ctx.lineTo(4 * f, 4); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  if (striking) {
+    ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(f * 18, -38, 62, f > 0 ? -0.9 : Math.PI - 0.5, f > 0 ? 0.5 : Math.PI + 0.9); ctx.stroke();
+  }
+}
+
 function drawDragon(b, ph) {
   const tired = b.mode === 'tired', flap = tired ? 0.2 : Math.sin(tick * 0.2);
   const body = ph === 1 ? '#8a5cd6' : ph === 2 ? '#d6587a' : '#e8563c';
@@ -2429,7 +2495,13 @@ function drawEffects() {
     ctx.beginPath(); ctx.moveTo(w.x - 6, w.y); ctx.quadraticCurveTo(w.x, w.y - 18, w.x + 6, w.y); ctx.fill();
   }
   for (const s of L.shots) {
-    if (s.kind === 'snow') {
+    if (s.kind === 'axe') {
+      ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(tick * 0.4 * Math.sign(s.vx || 1));
+      ctx.fillStyle = '#6b4a2a'; ctx.fillRect(-2, -10, 4, 20);
+      ctx.fillStyle = '#cfd6e2'; ctx.strokeStyle = '#14161e'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(2, -10); ctx.quadraticCurveTo(12, -6, 10, 2); ctx.lineTo(2, -2); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    } else if (s.kind === 'snow') {
       ctx.fillStyle = '#fff'; ctx.strokeStyle = '#8fb3d6'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(s.x, s.y, s.r + 1, 0, 6.283); ctx.fill(); ctx.stroke();
     } else if (s.kind === 'flame') {

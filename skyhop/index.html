@@ -239,7 +239,65 @@ const LEVELS = [
     b.enemy('hopper', 150); b.enemy('hopper', 154); b.enemy('blob', 157);
     b.goal(162);
   } },
-  { id: '1-3', name: 'BIG BLOB', world: 1, w: 100, sky: SKY_DUSK, build(b) {
+  { id: '1-3', name: 'WINDY HILLS', world: 1, w: 160, sky: SKY_DAY, build(b) {
+    b.ground(0, 18);
+    b.q(6, 13, 'heart'); b.coinRow(8, 11, 13);
+    b.enemy('blob', 12);
+    b.fill(19, 26, 13, LH - 1);
+    b.enemy('hopper', 23, 13);
+    b.plat(29, 30, 12); b.coin(29, 11); b.coin(30, 11);
+    b.ground(32, 52);
+    b.spring(36); b.plat(38, 42, 9); b.coinRow(38, 41, 8); b.big(42, 7);
+    b.enemy('spiky', 45);
+    b.q(48, 13, 'fire');
+    b.mplat(55, 13, 3, 64, 0, 0.025); b.coinRow(54, 59, 11);
+    b.mplat(63, 12, 3, 0, 48, 0.03);
+    b.enemy('buzzer', 60, 9, { range: 70 });
+    b.ground(67, 95);
+    b.check(70);
+    b.enemy('blob', 76); b.enemy('blob', 79);
+    b.fill(84, 87, 13, 15); b.q(85, 10, 'coin'); b.q(86, 10, 'coin');
+    b.fake(90, 93, 13, 15); b.big(91, 14);           // secret: hollow mound
+    b.plat(97, 99, 13); b.coin(98, 12);
+    b.ground(101, 128);
+    b.enemy('hopper', 106); b.enemy('buzzer', 112, 11, { range: 80 });
+    b.q(116, 13, 'star');
+    b.fill(124, 124, 15, 15); b.fill(125, 125, 14, 15); b.fill(126, 128, 13, 15);
+    b.fill(132, 134, 13, LH - 1); b.big(133, 10);
+    b.ground(138, 159);
+    b.enemy('blob', 145); b.enemy('hopper', 150);
+    b.goal(154);
+  } },
+  { id: '1-4', name: 'SUNSET RIDGE', world: 1, w: 160, sky: SKY_LATE, build(b) {
+    b.ground(0, 30);
+    b.sign(3, 'Climb the walls!');
+    b.q(7, 13, 'heart');
+    b.enemy('blob', 14);
+    b.fill(22, 22, 6, 12); b.fill(26, 26, 6, 15);
+    b.coin(24, 12); b.coin(24, 9); b.coin(24, 6); b.big(24, 4);
+    b.mplat(32, 14, 2, 32, 0, 0.03);
+    b.ground(35, 62);
+    b.enemy('hopper', 40);
+    b.q(44, 13, 'fire');
+    b.enemy('spiky', 47);
+    b.fill(52, 52, 4, 12); b.fill(56, 56, 4, 15);
+    b.coin(54, 12); b.coin(54, 9); b.coin(54, 6); b.big(54, 2);
+    b.check(60);
+    b.plat(65, 67, 14); b.plat(70, 72, 12); b.plat(75, 77, 13);
+    b.coin(66, 13); b.coin(71, 11); b.coin(76, 12);
+    b.enemy('buzzer', 71, 9, { range: 70 });
+    b.ground(80, 110);
+    b.enemy('blob', 85); b.enemy('blob', 88);
+    b.spring(92); b.plat(94, 99, 9); b.coinRow(94, 99, 8); b.q(97, 6, 'star');
+    b.enemy('hopper', 104);
+    b.mplat(113, 13, 2, 0, 48, 0.03); b.mplat(117, 11, 2, 0, 48, 0.03); b.mplat(121, 13, 2, 0, 48, 0.03);
+    b.coin(114, 10); b.coin(118, 8); b.coin(122, 10); b.big(117, 7);
+    b.ground(125, 159);
+    b.enemy('spiky', 132); b.enemy('blob', 138);
+    b.q(142, 13, 'coin');
+    b.goal(152);
+  } },
+  { id: '1-5', name: 'BIG BLOB', world: 1, w: 100, sky: SKY_DUSK, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(16, 13, 'fire');
     b.enemy('blob', 12); b.enemy('hopper', 20); b.enemy('blob', 26);
@@ -310,7 +368,58 @@ const LEVELS = [
     b.enemy('spiky', 124); b.enemy('buzzer', 128, 11, { range: 60 });
     b.goal(134);
   } },
-  { id: '2-3', name: 'GOLEM HALL', world: 2, w: 100, sky: CAVE, build(b) {
+  { id: '2-3', name: 'CRYSTAL MINES', world: 2, w: 150, sky: CAVE, build(b) {
+    b.ceil(0, 149, 3);
+    b.ground(0, 16);
+    b.q(6, 13, 'heart');
+    b.enemy('spitter', 13);
+    b.crumble(18, 20, 14); b.crumble(23, 25, 12); b.crumble(28, 30, 14);
+    b.coinRow(18, 20, 12); b.coinRow(23, 25, 10); b.coinRow(28, 30, 12); b.big(24, 9);
+    b.mplat(33, 13, 3, 48, 0, 0.03);
+    b.ground(40, 60);
+    b.enemy('blob', 44); b.check(48); b.enemy('hopper', 52);
+    b.fill(54, 57, 13, 15); b.q(58, 13, 'fire');
+    b.crumble(62, 63, 14); b.fill(66, 67, 12, LH - 1); b.crumble(70, 72, 12); b.big(71, 9);
+    b.enemy('spitter', 67, 12);
+    b.ground(76, 110);
+    b.enemy('buzzer', 85, 11, { range: 80 });
+    b.fill(90, 90, 6, 12); b.fill(94, 94, 6, 15);
+    b.coin(92, 12); b.coin(92, 9); b.big(92, 4);
+    b.enemy('blob', 100); b.enemy('spitter', 106);
+    b.crumble(112, 116, 14); b.crumble(119, 121, 12);
+    b.coinRow(112, 116, 12); b.coinRow(119, 121, 10);
+    b.ground(125, 149);
+    b.q(128, 13, 'star');
+    b.enemy('hopper', 134); b.enemy('blob', 138);
+    b.goal(144);
+  } },
+  { id: '2-4', name: 'ECHO CAVERN', world: 2, w: 140, sky: CAVE_DEEP, dark: true, build(b) {
+    b.ceil(0, 139, 3);
+    b.ground(0, 22);
+    b.sign(3, 'Stay close to the light');
+    for (let x = 5; x <= 21; x += 3) b.coin(x, 14);
+    b.q(10, 13, 'heart');
+    b.enemy('blob', 16);
+    b.plat(25, 25, 13); b.coin(25, 12);
+    b.ground(28, 48);
+    for (let x = 29; x <= 47; x += 3) b.coin(x, 14);
+    b.enemy('spitter', 36); b.enemy('hopper', 42);
+    b.fill(49, 51, 13, LH - 1); b.fill(52, 54, 10, LH - 1);
+    b.crumble(56, 58, 10); b.coinRow(56, 58, 9);
+    b.fill(61, 66, 10, LH - 1); b.big(64, 6);
+    b.check(63, 10);
+    b.ground(67, 100);
+    b.fill(74, 74, 6, 12); b.fill(78, 78, 6, 15);
+    b.coin(76, 12); b.coin(76, 9); b.big(76, 4);
+    b.enemy('buzzer', 86, 11, { range: 70 });
+    b.enemy('spiky', 92);
+    b.mplat(103, 13, 3, 48, 0, 0.03); b.big(105, 10);
+    b.ground(110, 139);
+    b.q(114, 13, 'fire');
+    b.enemy('spitter', 120); b.enemy('blob', 125); b.enemy('hopper', 129);
+    b.goal(134);
+  } },
+  { id: '2-5', name: 'GOLEM HALL', world: 2, w: 100, sky: CAVE, build(b) {
     b.ceil(0, 99, 3);
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
@@ -384,7 +493,71 @@ const LEVELS = [
     b.enemy('spitter', 140);
     b.goal(144);
   } },
-  { id: '3-3', name: 'STORM KING', world: 3, w: 100, sky: STORM_RED, build(b) {
+  { id: '3-3', name: 'LAVA HALLS', world: 3, w: 150, sky: STORM, build(b) {
+    b.ground(0, 18);
+    b.q(6, 13, 'heart');
+    b.enemy('spiky', 13);
+    b.lava(19, 30);
+    b.mplat(21, 13, 3, 48, 0, 0.03);
+    b.plat(27, 28, 13); b.big(27, 10);
+    b.ground(31, 50);
+    b.q(35, 13, 'fire');
+    b.enemy('spitter', 38);
+    b.spikes(42, 44);
+    b.enemy('chaser', 47, 9);
+    b.lava(51, 70);
+    b.blink(53, 55, 13, 'a'); b.blink(58, 60, 13, 'b');
+    b.mplat(63, 13, 3, 48, 0, 0.03);
+    b.plat(68, 69, 13);
+    b.ground(71, 95);
+    b.check(73);
+    b.enemy('blob', 80);
+    b.fill(84, 86, 13, 15); b.spikes(87, 90); b.fill(91, 93, 13, 15);
+    b.coinRow(87, 90, 11);
+    b.enemy('chaser', 94, 9);
+    b.lava(96, 110);
+    b.fill(99, 100, 13, LH - 1); b.fill(104, 105, 11, LH - 1); b.big(104, 8);
+    b.plat(108, 109, 13);
+    b.ground(111, 149);
+    b.q(116, 13, 'star');
+    b.enemy('spitter', 122);
+    b.blink(128, 129, 13, 'a'); b.fill(131, 134, 10, 15); b.big(133, 7);
+    b.enemy('hopper', 140);
+    b.goal(144);
+  } },
+  { id: '3-4', name: 'THRONE ROAD', world: 3, w: 160, sky: STORM, build(b) {
+    b.ground(0, 40);
+    b.q(6, 13, 'heart');
+    b.enemy('chaser', 14, 9);
+    b.spikes(18, 19);
+    b.fill(28, 28, 5, 12); b.fill(32, 32, 5, 15);
+    b.coin(30, 12); b.coin(30, 9); b.coin(30, 6); b.big(30, 3);
+    b.spikes(35, 37);
+    b.enemy('blob', 39);
+    b.lava(41, 56);
+    b.blink(43, 44, 13, 'b'); b.blink(47, 48, 12, 'a'); b.blink(51, 52, 13, 'b');
+    b.plat(54, 55, 13);
+    b.ground(57, 80);
+    b.check(59);
+    b.enemy('spitter', 66);
+    b.q(70, 13, 'fire');
+    b.enemy('chaser', 76, 8); b.enemy('spiky', 78);
+    b.fill(81, 84, 13, LH - 1); b.fill(85, 88, 10, LH - 1);
+    b.lava(89, 100);
+    b.mplat(91, 10, 2, 48, 0, 0.03);
+    b.plat(96, 97, 10); b.big(96, 7);
+    b.fill(99, 100, 9, LH - 1);
+    b.fill(101, 108, 11, LH - 1); b.spikes(103, 104, 10);
+    b.ground(109, 159);
+    b.enemy('hopper', 115); b.enemy('chaser', 122, 9);
+    b.blink(127, 128, 13, 'a'); b.blink(130, 131, 10, 'b');
+    b.fill(133, 138, 10, 15); b.big(136, 7);
+    b.spikes(140, 143);
+    b.q(148, 13, 'star');
+    b.enemy('blob', 150);
+    b.goal(155);
+  } },
+  { id: '3-5', name: 'STORM KING', world: 3, w: 100, sky: STORM_RED, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
     b.enemy('chaser', 20, 9); b.enemy('spiky', 26);
@@ -1910,6 +2083,17 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('skyhop.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('skyhop.' + k, JSON.stringify(v)); } catch (e) { /* storage blocked: progress lasts this session only */ } }
 };
+// v2 added levels 3 and 4 to every world, so boss levels moved from X-3 to X-5
+if (store.get('v', 1) < 2) {
+  const old = store.get('unlocked', 0);
+  store.set('unlocked', Math.floor(old / 3) * 5 + (old % 3 === 2 ? 4 : old % 3));
+  for (const w of [1, 2, 3]) for (const k of ['best.', 'big.']) {
+    const v = store.get(k + w + '-3', null);
+    if (v !== null) store.set(k + w + '-5', v);
+    try { localStorage.removeItem('skyhop.' + k + w + '-3'); } catch (e) { /* storage blocked */ }
+  }
+  store.set('v', 2);
+}
 let unlocked = store.get('unlocked', 0);
 
 // ---------- screens ----------

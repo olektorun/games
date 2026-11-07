@@ -157,6 +157,7 @@ const WORLDS = {
        ground: { body: '#e9dcb8', dot: '#d8c79a', edge: '#b0904e', top: ['#ffffff', '#e8ecf6', '#ffffff'] },
        plank: ['#ffffff', '#ffffff', '#c9d0e4'] }
 };
+WORLDS[6] = { ...WORLDS[3], name: 'Bonus' };   // the bonus level reuses the castle look
 
 // ---------- levels ----------
 const SKY_DAY = { g: ['#5ab8f5', '#a8defa', '#e3f6ff'], hills: ['#9fdc8f', '#6cc46a'], sun: '#fff6c4' };
@@ -816,7 +817,7 @@ const LEVELS = [
     b.cannon(138, 15);
     b.goal(144);
   } },
-  { id: '5-5', name: 'SKY DRAGON', world: 5, w: 100, sky: SKYK_NIGHT, build(b) {
+  { id: '5-5', name: 'SKY DRAGON', world: 5, w: 100, sky: SKYK_NIGHT, final: true, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
     b.cannon(22, 15);
@@ -833,6 +834,24 @@ const LEVELS = [
     b.big(75, 10);
     b.arena(70, 99);
     b.boss('dragon', 85);
+  } },
+
+  // unlocked after the final boss: the old world-3 boss, still the hardest fight
+  { id: 'BONUS', name: 'STORM KING', world: 6, w: 100, sky: STORM_RED, bonus: true, build(b) {
+    b.ground(0, 30);
+    b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
+    b.enemy('chaser', 20, 9); b.enemy('spiky', 26);
+    b.lava(31, 34); b.plat(32, 33, 13); b.big(33, 10);
+    b.ground(35, 69);
+    b.enemy('spitter', 46);
+    b.q(56, 13, 'heart'); b.big(56, 9);
+    b.check(64);
+    b.sign(66, 'Stomp him when he gets tired!');
+    b.ground(70, 99); b.fill(99, 99, 0, 15);
+    b.plat(74, 77, 13); b.plat(92, 95, 13);
+    b.big(75, 10);
+    b.arena(70, 99);
+    b.boss('king', 85);
   } }
 ];
 
@@ -2752,7 +2771,7 @@ function show(name) { for (const k in scr) scr[k].hidden = k !== name; }
 function buildLevelButtons() {
   const box = $('levelBtns'); box.innerHTML = '';
   const current = Math.min(unlocked, LEVELS.length - 1);
-  for (const w of [1, 2, 3, 4, 5]) {
+  for (const w of [1, 2, 3, 4, 5, 6]) {
     const row = document.createElement('div'); row.className = 'wrow';
     const name = document.createElement('span'); name.className = 'wname'; name.textContent = WORLDS[w].name;
     row.appendChild(name);
@@ -2760,7 +2779,7 @@ function buildLevelButtons() {
       if (lv.world !== w) return;
       const b = document.createElement('button');
       b.className = 'lvl' + (i === current ? '' : ' ghost');
-      b.textContent = lv.id + (store.get('best.' + lv.id, null) ? ' ✓' : '');
+      b.textContent = (lv.bonus ? '★ ' + lv.name : lv.id) + (store.get('best.' + lv.id, null) ? ' ✓' : '');
       b.disabled = i > unlocked;
       b.onclick = () => startLevel(i);
       row.appendChild(b);
@@ -2799,16 +2818,18 @@ function finishLevel() {
   const bigNow = L.big.filter(c => c.got).length, bigBest = Math.max(bigNow, store.get('big.' + id, 0));
   store.set('big.' + id, bigBest);
   if (!last && unlocked < levelIndex + 1) { unlocked = levelIndex + 1; store.set('unlocked', unlocked); }
-  $('dTitle').textContent = last ? 'You beat Skyhop!' : bossLevel ? 'World ' + L.def.world + ' clear!' : 'Level clear!';
-  $('dNote').hidden = !last && !bossLevel;
-  $('dNote').textContent = last ? 'Thanks for playing! Try to find every big coin.' : bossLevel ? 'Next: ' + WORLDS[L.def.world + 1].name : '';
+  $('dTitle').textContent = L.def.bonus ? 'Bonus clear!' : L.def.final ? 'You beat Skyhop!' : bossLevel ? 'World ' + L.def.world + ' clear!' : 'Level clear!';
+  $('dNote').hidden = !bossLevel;
+  $('dNote').textContent = L.def.bonus ? 'You beat the Storm King — you are a Skyhop master!'
+    : L.def.final ? 'Bonus level unlocked: the Storm King is back!'
+    : bossLevel ? 'Next: ' + WORLDS[L.def.world + 1].name : '';
   $('dTime').textContent = fmt(time);
   $('dBest').textContent = fmt(best);
   $('dCoins').textContent = got;
   $('dBig').textContent = bigNow + ' / 3';
   $('dDeaths').textContent = deaths;
   $('nextBtn').hidden = last;
-  $('nextBtn').textContent = bossLevel ? 'Next world' : 'Next level';
+  $('nextBtn').textContent = L.def.final ? 'Bonus level' : bossLevel ? 'Next world' : 'Next level';
   setTimeout(() => { if (state === 'done') show('done'); }, 400);
 }
 

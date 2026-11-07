@@ -210,7 +210,7 @@ const LEVELS = [
     b.mplat(17, 14, 3, 64, 0, 0.02); b.coinRow(16, 21, 11);
     b.ground(23, 40);
     b.enemy('hopper', 30);
-    b.plat(27, 30, 12); b.plat(33, 36, 9); b.coinRow(33, 36, 8); b.big(35, 5);
+    b.plat(27, 30, 13); b.plat(33, 36, 10); b.coinRow(33, 36, 9); b.big(35, 6);
     b.plat(43, 45, 14); b.plat(48, 50, 12); b.plat(53, 55, 13);
     b.coin(44, 13); b.coin(49, 11); b.coin(54, 12);
     b.enemy('buzzer', 49, 9, { range: 90 });
@@ -250,7 +250,7 @@ const LEVELS = [
     b.check(64);
     b.sign(66, 'Stomp the Big Blob!');
     b.ground(70, 99); b.fill(99, 99, 0, 15);
-    b.plat(74, 77, 12); b.plat(92, 95, 12);
+    b.plat(74, 77, 13); b.plat(92, 95, 13);
     b.big(75, 10);
     b.arena(70, 99);
     b.boss('blob', 88);
@@ -267,7 +267,7 @@ const LEVELS = [
     b.ground(36, 60);
     b.q(42, 13, 'fire');
     b.enemy('spitter', 48);
-    b.plat(52, 55, 12); b.coinRow(52, 55, 11); b.big(54, 9);
+    b.plat(52, 55, 13); b.coinRow(52, 55, 12); b.big(54, 10);
     b.check(58);
     b.crumble(62, 64, 14); b.fill(66, 67, 13, LH - 1); b.crumble(70, 72, 13);
     b.enemy('spitter', 67, 13);
@@ -322,7 +322,7 @@ const LEVELS = [
     b.check(64);
     b.sign(66, 'Stomp the glowing crystal!');
     b.ground(70, 99); b.fill(99, 99, 0, 15);
-    b.plat(74, 77, 12); b.plat(92, 95, 12);
+    b.plat(74, 77, 13); b.plat(92, 95, 13);
     b.big(75, 10);
     b.arena(70, 99);
     b.boss('golem', 88);
@@ -342,12 +342,12 @@ const LEVELS = [
     b.ground(53, 75);
     b.q(58, 13, 'fire');
     b.enemy('spitter', 62);
-    b.enemy('chaser', 70, 10);
+    b.enemy('chaser', 57, 9);
     b.check(72);
     b.ground(76, 100);
     b.spikes(80, 92);
-    b.plat(81, 84, 12); b.plat(88, 91, 12);
-    b.coinRow(81, 84, 11); b.coinRow(88, 91, 11); b.big(86, 9);
+    b.plat(81, 84, 13); b.plat(88, 91, 13);
+    b.coinRow(81, 84, 12); b.coinRow(88, 91, 12); b.big(86, 10);
     b.enemy('spiky', 96);
     b.lava(101, 108); b.fill(104, 105, 13, LH - 1);
     b.ground(109, 159);
@@ -395,7 +395,7 @@ const LEVELS = [
     b.check(64);
     b.sign(66, 'Stomp him when he gets tired!');
     b.ground(70, 99); b.fill(99, 99, 0, 15);
-    b.plat(74, 77, 12); b.plat(92, 95, 12);
+    b.plat(74, 77, 13); b.plat(92, 95, 13);
     b.big(75, 10);
     b.arena(70, 99);
     b.boss('king', 85);
@@ -481,7 +481,7 @@ function makeEnemy(type, tx, ty, opt) {
   return {
     type, x, y, w, h, vx: 0, vy: 0, dir: opt.dir || -1, t: Math.floor(hash(tx, ty) * 200),
     wait: Math.floor(hash(ty, tx) * 60), dying: 0, flip: false, grounded: false, mouth: 0, shy: false,
-    x0: x, y0: y, range: opt.range || 80, stompable: type !== 'spiky' && type !== 'chaser'
+    x0: x, y0: y, range: opt.range || 80, stompable: type !== 'spiky'
   };
 }
 
@@ -860,6 +860,9 @@ function die() {
 
 function respawnPlayer() {
   resetPlayer(respawn);
+  p.inv = 90;
+  // ghosts go back home, otherwise one waiting at the checkpoint kills you over and over
+  for (const e of L.enemies) if (e.type === 'chaser' && !e.dying) { e.x = e.x0; e.y = e.y0; e.vx = 0; e.vy = 0; }
   // dying in the boss room resets the fight
   if (L.arena && L.arena.on && L.boss && !L.boss.dead) {
     L.arena.on = false;

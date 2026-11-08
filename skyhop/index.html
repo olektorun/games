@@ -16,7 +16,7 @@
   .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
           gap:1.8cqw;text-align:center;background:rgba(13,27,42,.55);backdrop-filter:blur(3px);padding:3cqw}
   .screen[hidden]{display:none}
-  h1{margin:0;font-size:7.5cqw;font-weight:700;letter-spacing:.02em;line-height:1;
+  h1{margin:0;font-size:6cqw;font-weight:700;letter-spacing:.02em;line-height:1;
      text-shadow:0 .6cqw 0 #2b6cb0,0 1.2cqw 2cqw rgba(0,0,0,.3)}
   h2{margin:0;font-size:6cqw;font-weight:700;text-shadow:0 .4cqw 0 #2b6cb0}
   p{margin:0;font-size:1.8cqw;opacity:.9}
@@ -26,11 +26,11 @@
   button:active{transform:translateY(2px);box-shadow:0 .1cqw 0 #c99a00}
   button.ghost{background:rgba(255,255,255,.15);color:#fff;box-shadow:none}
   button:disabled{opacity:.35;cursor:default;transform:none}
-  .lvl{font-size:1.6cqw;padding:.6cqw 1.8cqw}
+  .lvl{font-size:1.35cqw;padding:.4cqw 1.3cqw}
   .row{display:flex;gap:1.5cqw;flex-wrap:wrap;justify-content:center}
-  .worlds{display:flex;flex-direction:column;gap:.9cqw}
+  .worlds{display:flex;flex-direction:column;gap:.55cqw}
   .wrow{display:flex;gap:1cqw;align-items:center;justify-content:center}
-  .wname{font-size:1.5cqw;font-weight:600;width:14cqw;text-align:right;opacity:.85}
+  .wname{font-size:1.3cqw;font-weight:600;width:12cqw;text-align:right;opacity:.85}
   .keys{display:grid;grid-template-columns:repeat(3,auto);gap:.5cqw 2.5cqw;font-size:1.5cqw;text-align:left}
   kbd{font:inherit;font-weight:600;background:rgba(255,255,255,.18);border-radius:.5cqw;padding:.1cqw .8cqw;margin-right:.4cqw}
   .stats{display:grid;grid-template-columns:auto auto;gap:.5cqw 3cqw;font-size:2.2cqw;text-align:left}
@@ -157,7 +157,10 @@ const WORLDS = {
        ground: { body: '#e9dcb8', dot: '#d8c79a', edge: '#b0904e', top: ['#ffffff', '#e8ecf6', '#ffffff'] },
        plank: ['#ffffff', '#ffffff', '#c9d0e4'] }
 };
-WORLDS[6] = { ...WORLDS[3], name: 'Bonus' };   // the bonus level reuses the castle look
+WORLDS[6] = { name: 'Moon Base', bg: 'space', grav: 0.6,
+  ground: { body: '#4a4f66', dot: '#3b4054', edge: '#22263a', top: ['#5fd6ff', '#2a6f8f', '#c8f6ff'] },
+  plank: ['#5a6078', '#9aa3c0', '#2a2e40'] };
+WORLDS[7] = { ...WORLDS[3], name: 'Bonus' };   // the bonus level reuses the castle look
 
 // ---------- levels ----------
 const SKY_DAY = { g: ['#5ab8f5', '#a8defa', '#e3f6ff'], hills: ['#9fdc8f', '#6cc46a'], sun: '#fff6c4' };
@@ -171,6 +174,144 @@ const SNOW = { g: ['#7fb2e0', '#bfe0f5', '#f2fbff'], peaks: ['#cfe1f0', '#a5c2da
 const SNOW_DUSK = { g: ['#4a5a9a', '#b08ab8', '#ffd0b8'], peaks: ['#b6aed0', '#8c86b0'], sun: '#ffe6c8' };
 const SKYK = { g: ['#ff9f5a', '#ffd29a', '#fff3d6'], sea: ['#fff6ea', '#ffe6c4'], sun: '#fff8d0' };
 const SKYK_NIGHT = { g: ['#2a1f5a', '#7a4a8a', '#ffb88a'], sea: ['#e8d8f0', '#c8b0d8'], sun: '#ffe0b0' };
+const MOON = { g: ['#04030c', '#0d0a22', '#1d1640'], planet: '#ff8a5a', ridge: ['#2b2b44', '#1d1d30'] };
+const MOON2 = { g: ['#020610', '#081a2e', '#12304a'], planet: '#6ad0ff', ridge: ['#22303f', '#162230'] };
+
+// ---------- generated levels: stitched from small hand-made pieces ----------
+// Every piece starts and ends on ground row G, so any order of pieces stays playable.
+function rng(seed) { let s = seed >>> 0 || 1; return () => (s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296; }
+const FOES = { 1: ['blob', 'hopper', 'buzzer', 'spiky'], 2: ['blob', 'hopper', 'spitter', 'buzzer'], 3: ['spitter', 'chaser', 'spiky', 'blob'],
+               4: ['slider', 'blob', 'spiky', 'buzzer'], 5: ['hopper', 'blob', 'spiky', 'buzzer'], 6: ['blob', 'hopper', 'buzzer', 'spitter'] };
+const ALL = [1, 2, 3, 4, 5, 6], wet = c => c.world === 3 || c.world === 4;
+const PIECES = {
+  gap: { w: 8, big: true, in: ALL, f(b, x, c) {
+    b.ground(x, x + 1); b.ground(x + 5, x + 7); if (wet(c)) b.lava(x + 2, x + 4);
+    b.coin(x + 2, 13); b.coin(x + 3, 12); b.coin(x + 4, 13); if (c.big) b.big(x + 3, 10);
+  } },
+  steps: { w: 12, big: true, in: ALL, f(b, x, c) {
+    b.ground(x, x + 11); b.fill(x + 3, x + 5, 13, 15); b.fill(x + 6, x + 8, 10, 15);
+    b.coinRow(x + 6, x + 8, 9); c.foe(x + 10); if (c.big) b.big(x + 7, 7);
+  } },
+  platPit: { w: 12, big: true, in: ALL, f(b, x, c) {
+    b.ground(x, x + 1); if (wet(c)) b.lava(x + 2, x + 9);
+    b.plat(x + 3, x + 4, 14); b.plat(x + 6, x + 7, 12); b.ground(x + 10, x + 11);
+    b.coin(x + 3, 13); b.coin(x + 4, 13); b.coin(x + 6, 11); b.coin(x + 7, 11); if (c.big) b.big(x + 6, 9);
+  } },
+  chimney: { w: 12, big: true, in: ALL, f(b, x, c) {
+    b.ground(x, x + 11); b.fill(x + 4, x + 4, 6, 12); b.fill(x + 8, x + 8, 6, 15);
+    b.coin(x + 6, 12); b.coin(x + 6, 9); if (c.big) b.big(x + 6, 4);
+  } },
+  mplat: { w: 13, big: true, in: ALL, f(b, x, c) {
+    b.ground(x, x + 1); if (wet(c)) b.lava(x + 2, x + 9);
+    b.mplat(x + 4, 14, 3, 48, 0, 0.025); b.ground(x + 10, x + 12);
+    b.coinRow(x + 3, x + 8, 12); if (c.big) b.big(x + 5, 11);
+  } },
+  foes: { w: 14, big: false, in: ALL, f(b, x, c) {
+    b.ground(x, x + 13); b.q(x + 4, 13, 'coin'); c.foe(x + 7); c.foe(x + 11);
+  } },
+  spring: { w: 14, big: true, in: [1, 2, 4, 5, 6], f(b, x, c) {
+    b.ground(x, x + 13); b.spring(x + 3); b.plat(x + 5, x + 9, 9); b.coinRow(x + 5, x + 8, 8); if (c.big) b.big(x + 9, 7);
+  } },
+  pillars: { w: 14, big: true, in: ALL, f(b, x, c) {
+    b.ground(x, x + 1); if (wet(c)) b.lava(x + 2, x + 11);
+    b.fill(x + 4, x + 5, 14, LH - 1); b.fill(x + 8, x + 9, 12, LH - 1); b.ground(x + 12, x + 13);
+    b.coin(x + 4, 13); b.coin(x + 8, 11); if (c.big) b.big(x + 8, 9);
+  } },
+  qrow: { w: 11, big: false, in: ALL, f(b, x, c) {
+    // blocks spaced apart so a power-up never lands on a neighbouring block
+    b.ground(x, x + 10); b.q(x + 2, 13, 'coin'); b.q(x + 5, 13, c.power || 'coin'); b.q(x + 8, 13, 'coin');
+  } },
+  crumble: { w: 12, big: true, in: [2, 5], f(b, x, c) {
+    b.ground(x, x + 1); b.crumble(x + 2, x + 9, 14); b.ground(x + 10, x + 11);
+    b.coinRow(x + 3, x + 8, 12); if (c.big) b.big(x + 6, 11);
+  } },
+  crumbleSteps: { w: 13, big: true, in: [2], f(b, x, c) {
+    b.ground(x, x + 1); b.crumble(x + 3, x + 5, 14); b.crumble(x + 7, x + 9, 12); b.ground(x + 11, x + 12);
+    b.coinRow(x + 3, x + 5, 13); b.coinRow(x + 7, x + 9, 11); if (c.big) b.big(x + 8, 9);
+  } },
+  spikeRun: { w: 14, big: true, in: [3, 6], f(b, x, c) {
+    b.ground(x, x + 13); b.spikes(x + 3, x + 10); b.plat(x + 4, x + 6, 13); b.plat(x + 8, x + 10, 13);
+    b.coinRow(x + 4, x + 10, 12); if (c.big) b.big(x + 7, 10);
+  } },
+  lavaBlink: { w: 14, big: true, in: [3], f(b, x, c) {
+    b.ground(x, x + 1); b.lava(x + 2, x + 11); b.blink(x + 3, x + 5, 13, 'a'); b.blink(x + 7, x + 9, 13, 'b'); b.ground(x + 12, x + 13);
+    if (c.big) b.big(x + 8, 10);
+  } },
+  lavaPlats: { w: 12, big: true, in: [3, 4], f(b, x, c) {
+    b.ground(x, x + 1); b.lava(x + 2, x + 9); b.plat(x + 3, x + 4, 14); b.plat(x + 6, x + 7, 13); b.ground(x + 10, x + 11);
+    b.coin(x + 3, 13); b.coin(x + 6, 12); if (c.big) b.big(x + 6, 10);
+  } },
+  floes: { w: 14, big: true, in: [4], f(b, x, c) {
+    b.ground(x, x + 1); b.lava(x + 2, x + 11); b.ice(x + 3, x + 4, 15); b.ice(x + 6, x + 7, 14); b.ice(x + 9, x + 10, 15); b.ground(x + 12, x + 13);
+    b.coin(x + 3, 14); b.coin(x + 6, 13); b.coin(x + 9, 14); if (c.big) b.big(x + 6, 11);
+  } },
+  icicles: { w: 14, big: true, in: [4], f(b, x, c) {
+    b.ground(x, x + 13); b.ice(x, x + 13, G); b.fill(x + 2, x + 2, 13, 15); b.ice(x + 4, x + 11, 11);
+    b.icicle(x + 5, 12); b.icicle(x + 8, 12); b.icicle(x + 11, 12); b.coinRow(x + 5, x + 10, 10); if (c.big) b.big(x + 8, 8);
+  } },
+  iceRun: { w: 14, big: false, in: [4], f(b, x, c) {
+    b.ground(x, x + 13); b.ice(x, x + 13, G); c.foe(x + 6, 'slider'); c.foe(x + 11, 'slider'); b.coinRow(x + 3, x + 10, 15);
+  } },
+  windGap: { w: 14, big: true, in: [5], f(b, x, c) {
+    b.ground(x, x + 1); b.wind(x + 2, x + 11, 8, 15, 1, 0); b.plat(x + 5, x + 7, 13); b.ground(x + 12, x + 13);
+    b.coin(x + 3, 12); b.coin(x + 6, 12); b.coin(x + 9, 13); if (c.big) b.big(x + 6, 10);
+  } },
+  updraft: { w: 14, big: true, in: [5, 6], f(b, x, c) {
+    b.ground(x, x + 2); b.wind(x + 3, x + 5, 2, LH - 1, 0, -1); b.fill(x + 6, x + 10, 7, LH - 1); b.ground(x + 11, x + 13);
+    b.coin(x + 4, 10); b.coin(x + 4, 6); if (c.big) b.big(x + 8, 4);
+  } },
+  cannons: { w: 14, big: false, in: [5, 6], f(b, x, c) {
+    b.ground(x, x + 13); b.cannon(x + 4, 15); b.cannon(x + 10, 15); b.coinRow(x + 6, x + 8, 13);
+  } },
+  lasers: { w: 14, big: false, in: [6], f(b, x, c) {
+    b.ground(x, x + 13); b.laser(x + 4, 8, 15, 0); b.laser(x + 8, 8, 15, 50); b.laser(x + 12, 8, 15, 100);
+    b.coinRow(x + 5, x + 7, 15); b.coinRow(x + 9, x + 11, 15);
+  } },
+  moonGap: { w: 14, big: true, in: [6], f(b, x, c) {
+    // a 7-tile pit: only crossable with moon gravity
+    b.ground(x, x + 1); b.ground(x + 9, x + 13);
+    b.coin(x + 3, 12); b.coin(x + 5, 11); b.coin(x + 7, 12); if (c.big) b.big(x + 5, 9);
+  } },
+  tallSteps: { w: 14, big: true, in: [6], f(b, x, c) {
+    b.ground(x, x + 13); b.fill(x + 4, x + 7, 11, 15); b.fill(x + 8, x + 10, 7, 15);
+    b.coinRow(x + 8, x + 10, 6); c.foe(x + 12); if (c.big) b.big(x + 9, 4);
+  } }
+};
+function gen(id, name, world, sky, n, extra = {}) {
+  let seed = 7;
+  for (const ch of id + name) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+  const r = rng(seed), pool = Object.keys(PIECES).filter(k => PIECES[k].in.includes(world) && k !== 'qrow');
+  const seq = [];
+  for (let i = 0; i < n; i++) {
+    if (i === 1 || i === n - 2) { seq.push('qrow'); continue; }
+    let k;
+    do { k = pool[Math.floor(r() * pool.length)]; } while (k === seq[seq.length - 1]);
+    seq.push(k);
+  }
+  const bigs = seq.map((k, i) => PIECES[k].big ? i : -1).filter(i => i >= 0);
+  const pick = bigs.length <= 3 ? bigs : [bigs[0], bigs[Math.floor(bigs.length / 2)], bigs[bigs.length - 1]];
+  const mid = Math.floor(n / 2), foeSeeds = seq.map(() => Math.floor(r() * 1e9));
+  const w = 10 + seq.reduce((sum, k) => sum + PIECES[k].w, 0) + 6 + 14;
+  return { id, name, world, w, sky, ...extra, build(b) {
+    if (world === 2) b.ceil(0, w - 1, 3);
+    b.ground(0, 9); b.q(5, 13, 'heart');
+    if (extra.intro) b.sign(3, extra.intro);
+    let x = 10;
+    const powers = ['fire', 'star'];
+    seq.forEach((k, i) => {
+      if (i === mid) { b.ground(x, x + 5); b.check(x + 3); x += 6; }
+      const fr = rng(foeSeeds[i]), nearCheck = i === mid || i === mid - 1;
+      const c = { world, big: pick.includes(i), power: k === 'qrow' ? powers.shift() : null,
+        foe(fx, type) {
+          let t = type || FOES[world][Math.floor(fr() * FOES[world].length)];
+          if (t === 'chaser' && nearCheck) t = 'spiky';    // no ghost camping the checkpoint
+          if (t === 'buzzer') b.enemy(t, fx, 10, { range: 60 }); else if (t === 'chaser') b.enemy(t, fx, 9); else b.enemy(t, fx);
+        } };
+      PIECES[k].f(b, x, c); x += PIECES[k].w;
+    });
+    b.ground(x, x + 13); b.goal(x + 8);
+  } };
+}
 
 const LEVELS = [
   { id: '1-1', name: 'GREEN START', world: 1, w: 160, sky: SKY_DAY, build(b) {
@@ -308,7 +449,9 @@ const LEVELS = [
     b.q(142, 13, 'coin');
     b.goal(152);
   } },
-  { id: '1-5', name: 'BIG BLOB', world: 1, w: 100, sky: SKY_DUSK, build(b) {
+  gen('1-5', 'MEADOW RUN', 1, SKY_DAY, 8),
+  gen('1-6', 'HILLTOP DASH', 1, SKY_LATE, 9),
+  { id: '1-7', name: 'BIG BLOB', world: 1, w: 100, sky: SKY_DUSK, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(16, 13, 'fire');
     b.enemy('blob', 12); b.enemy('hopper', 20); b.enemy('blob', 26);
@@ -430,7 +573,9 @@ const LEVELS = [
     b.enemy('spitter', 120); b.enemy('blob', 125); b.enemy('hopper', 129);
     b.goal(134);
   } },
-  { id: '2-5', name: 'GOLEM HALL', world: 2, w: 100, sky: CAVE, build(b) {
+  gen('2-5', 'GEM TUNNELS', 2, CAVE, 8),
+  gen('2-6', 'SHADOW MINE', 2, CAVE_DEEP, 8, { dark: true }),
+  { id: '2-7', name: 'GOLEM HALL', world: 2, w: 100, sky: CAVE, build(b) {
     b.ceil(0, 99, 3);
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
@@ -568,7 +713,9 @@ const LEVELS = [
     b.enemy('blob', 150);
     b.goal(155);
   } },
-  { id: '3-5', name: 'IRON KNIGHT', world: 3, w: 100, sky: STORM_RED, build(b) {
+  gen('3-5', 'SPIKE KEEP', 3, STORM, 8),
+  gen('3-6', 'EMBER BRIDGE', 3, STORM_RED, 9),
+  { id: '3-7', name: 'IRON KNIGHT', world: 3, w: 100, sky: STORM_RED, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
     b.enemy('chaser', 20, 9); b.enemy('spiky', 26);
@@ -684,7 +831,9 @@ const LEVELS = [
     b.enemy('slider', 135); b.enemy('slider', 139);
     b.goal(144);
   } },
-  { id: '4-5', name: 'FROST YETI', world: 4, w: 100, sky: SNOW_DUSK, build(b) {
+  gen('4-5', 'SNOWDRIFT', 4, SNOW, 8),
+  gen('4-6', 'ICEFALL', 4, SNOW_DUSK, 9),
+  { id: '4-7', name: 'FROST YETI', world: 4, w: 100, sky: SNOW_DUSK, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
     b.enemy('slider', 20); b.enemy('blob', 26);
@@ -817,7 +966,9 @@ const LEVELS = [
     b.cannon(138, 15);
     b.goal(144);
   } },
-  { id: '5-5', name: 'SUN PHOENIX', world: 5, w: 100, sky: SKYK_NIGHT, final: true, build(b) {
+  gen('5-5', 'BREEZE ISLES', 5, SKYK, 8),
+  gen('5-6', 'CANNON COAST', 5, SKYK_NIGHT, 9),
+  { id: '5-7', name: 'SKY EYE', world: 5, w: 100, sky: SKYK_NIGHT, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
     b.cannon(22, 15);
@@ -828,7 +979,7 @@ const LEVELS = [
     b.enemy('spiky', 46);
     b.q(56, 13, 'heart'); b.big(56, 9);
     b.check(64);
-    b.sign(66, 'Stomp the phoenix when it lands!');
+    b.sign(66, 'Stomp the eye when it lands!');
     b.ground(70, 99); b.fill(99, 99, 0, 15);
     b.plat(74, 77, 13); b.plat(92, 95, 13);
     b.big(75, 10);
@@ -836,8 +987,31 @@ const LEVELS = [
     b.boss('dragon', 85);
   } },
 
-  // unlocked after the Sun Phoenix: the old world-3 boss, still the hardest fight
-  { id: 'BONUS', name: 'STORM KING', world: 6, w: 100, sky: STORM_RED, bonus: true, build(b) {
+  gen('6-1', 'LUNAR LANDING', 6, MOON, 7, { intro: 'Low gravity: you jump much higher!' }),
+  gen('6-2', 'CRATER FIELDS', 6, MOON, 8),
+  gen('6-3', 'LASER LAB', 6, MOON2, 8),
+  gen('6-4', 'ZERO-G TOWERS', 6, MOON, 9),
+  gen('6-5', 'ORBIT YARD', 6, MOON2, 9),
+  gen('6-6', 'MOTHERSHIP DOCK', 6, MOON2, 10),
+  { id: '6-7', name: 'UFO OVERLORD', world: 6, w: 100, sky: MOON2, final: true, build(b) {
+    b.ground(0, 30);
+    b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
+    b.enemy('hopper', 20); b.cannon(26, 15);
+    b.plat(32, 33, 13); b.big(33, 10);
+    b.ground(35, 69);
+    b.laser(46, 8, 15, 0);
+    b.q(56, 13, 'heart'); b.big(56, 9);
+    b.check(64);
+    b.sign(66, 'Stomp the UFO when it lands!');
+    b.ground(70, 99); b.fill(99, 99, 0, 15);
+    b.plat(74, 77, 13); b.plat(92, 95, 13);
+    b.big(75, 10);
+    b.arena(70, 99);
+    b.boss('ufo', 85);
+  } },
+
+  // unlocked after the final boss: the old world-3 boss, still the hardest fight
+  { id: 'BONUS', name: 'STORM KING', world: 7, w: 100, sky: STORM_RED, bonus: true, build(b) {
     b.ground(0, 30);
     b.q(8, 13, 'heart'); b.q(14, 13, 'fire');
     b.enemy('chaser', 20, 9); b.enemy('spiky', 26);
@@ -867,7 +1041,7 @@ function loadLevel(i) {
     q: {}, bumps: {}, plats: [], goal: null, start: { x: 3 * T, y: G * T },
     arena: null, boss: null, bossX: 0, bossKind: null,
     waves: [], fires: [], shots: [], drops: [], bolts: [], texts: [], fly: [],
-    crumb: {}, blink: { phase: 0, t: 0, hold: new Set() }, reveal: 0, winds: [], cannons: []
+    crumb: {}, blink: { phase: 0, t: 0, hold: new Set() }, reveal: 0, winds: [], cannons: [], lasers: [], gm: WORLDS[def.world].grav || 1
   };
   const fill = (x0, x1, y0, y1, v = SOLID) => {
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) lv.grid[y][x] = v;
@@ -886,6 +1060,7 @@ function loadLevel(i) {
     icicle: (x, y) => lv.drops.push({ x: x * T + T / 2, y: y * T, vy: 0, warn: -1, ice: true }),
     wind: (x0, x1, y0, y1, dx, dy) => lv.winds.push({ x: x0 * T, y: y0 * T, w: (x1 - x0 + 1) * T, h: (y1 - y0 + 1) * T, dx, dy }),
     cannon: (x, y) => { lv.grid[y][x] = CANNON; lv.cannons.push({ tx: x, ty: y, t: 60 }); },
+    laser: (x, y0, y1, off) => lv.lasers.push({ x: x * T + T / 2, y0: y0 * T, y1: (y1 + 1) * T, off }),
     coin: (x, y) => lv.coins.push({ x: x * T + T / 2, y: y * T + T / 2, got: false, ph: hash(x, y) * 6 }),
     coinRow(x0, x1, y) { for (let x = x0; x <= x1; x++) this.coin(x, y); },
     big: (x, y) => lv.big.push({ x: x * T + T / 2, y: y * T + T / 2, got: false }),
@@ -944,7 +1119,7 @@ function makeEnemy(type, tx, ty, opt) {
 
 // gravity + tile collision for anything that is not the player
 function moveBody(o, grav = 0.5) {
-  o.vy = Math.min(o.vy + grav, 10);
+  o.vy = Math.min(o.vy + grav * L.gm, 10);
   o.hitWall = false;
   o.x += o.vx;
   if (solidBox(o.x, o.y, o.w, o.h)) {
@@ -1044,15 +1219,16 @@ const BOSSES = {
   king: { name: 'STORM KING', w: 60, h: 72 },
   yeti: { name: 'FROST YETI', w: 70, h: 80 },
   knight: { name: 'IRON KNIGHT', w: 52, h: 70 },
-  dragon: { name: 'SUN PHOENIX', w: 92, h: 60 }
+  dragon: { name: 'SKY EYE', w: 92, h: 60 },
+  ufo: { name: 'UFO OVERLORD', w: 96, h: 44 }
 };
-const isFlyer = b => b.kind === 'king' || b.kind === 'dragon';
+const isFlyer = b => b.kind === 'king' || b.kind === 'dragon' || b.kind === 'ufo';
 function makeBoss(kind, tx) {
   const d = BOSSES[kind];
   return {
-    kind, name: d.name, x: tx * T, y: kind === 'king' || kind === 'dragon' ? 5 * T : G * T - d.h, w: d.w, h: d.h,
+    kind, name: d.name, x: tx * T, y: isFlyer({ kind }) ? 5 * T : G * T - d.h, w: d.w, h: d.h,
     vx: 0, vy: 0, hp: 6, t: 0, at: 0, inv: 0, jumps: 0, attacks: 0, tired: 0,
-    grounded: false, active: false, dead: 0, squash: 0, face: -1, mode: kind === 'king' || kind === 'dragon' ? 'fly' : 'walk', landed: false, tx: 0, ty: 0
+    grounded: false, active: false, dead: 0, squash: 0, face: -1, mode: isFlyer({ kind }) ? 'fly' : 'walk', landed: false, tx: 0, ty: 0
   };
 }
 function bossPhase(b) { return b.hp > 4 ? 1 : b.hp > 2 ? 2 : 3; }
@@ -1074,6 +1250,7 @@ function updateBoss(b) {
   else if (b.kind === 'yeti') updateYeti(b, ph);
   else if (b.kind === 'knight') updateKnight(b, ph);
   else if (b.kind === 'dragon') updateDragon(b, ph);
+  else if (b.kind === 'ufo') updateUfo(b, ph);
   else updateKing(b, ph);
 }
 
@@ -1281,6 +1458,35 @@ function updateDragon(b, ph) {
   } else if (b.mode === 'rise') {
     b.y -= 3;
     if (b.y < 4.5 * T) { b.mode = 'fly'; b.at = 0; }
+  }
+}
+
+// final boss: hovers, fires lasers straight down, drops bombs, then sinks to the ground to rest
+function updateUfo(b, ph) {
+  const cx = (arenaLeft() + arenaRight()) / 2;
+  if (b.mode === 'fly') {
+    b.t++;
+    const tx = cx + Math.sin(b.t * 0.013) * ((arenaRight() - arenaLeft()) / 2 - 100) - b.w / 2;
+    b.x += (tx - b.x) * 0.05; b.y += (4 * T + Math.sin(b.t * 0.07) * 10 - b.y) * 0.08;
+    if (++b.at > [0, 110, 90, 75][ph]) {
+      b.at = 0; b.attacks++;
+      L.bolts.push({ x: p.x + p.w / 2, warn: 50, strike: 22, laser: true });
+      if (ph === 3) L.bolts.push({ x: arenaLeft() + 40 + Math.random() * (arenaRight() - arenaLeft() - 80), warn: 65, strike: 22, laser: true });
+      if (ph >= 2) for (const d of [-1, 1]) L.shots.push({ x: b.x + b.w / 2 + d * 24, y: b.y + b.h, vx: d * 1.2, vy: 0, grav: 0.2, r: 8, life: 240, kind: 'bomb' });
+      if (ph === 3 && b.attacks % 2 === 0 && L.enemies.filter(e => !e.dying).length < 3) {
+        const m = makeEnemy('blob', 0, 0, {}); m.x = b.x + b.w / 2 - 12; m.y = b.y + b.h; m.summoned = true; L.enemies.push(m);
+      }
+      sfx('spit');
+      if (b.attacks % 3 === 0) b.mode = 'down';
+    }
+  } else if (b.mode === 'down') {
+    b.y += 2.5;
+    if (b.y + b.h >= G * T) { b.y = G * T - b.h; b.mode = 'tired'; b.tired = 160; shake = Math.max(shake, 6); sfx('boom'); b.squash = 1; }
+  } else if (b.mode === 'tired') {
+    if (--b.tired <= 0) b.mode = 'rise';
+  } else if (b.mode === 'rise') {
+    b.y -= 3;
+    if (b.y < 4 * T) { b.mode = 'fly'; b.at = 0; }
   }
 }
 
@@ -1518,6 +1724,7 @@ function updatePlayer() {
   let g = p.vy < 0 ? (input.jump || p.noCut > 0 ? G_UP : G_CUT) : G_DOWN;
   if (Math.abs(p.vy) < 1.6 && input.jump) g *= 0.55;   // short float at the top of the jump
   if (p.noCut > 0) p.noCut--;
+  g *= L.gm;   // moon gravity
   p.vy += g;
 
   p.sliding = false;
@@ -1594,6 +1801,9 @@ function updatePlayer() {
     if (t === LAVA && p.y + p.h > ty * T + 6) lava = true;
     if (t === SPIKE && p.y + p.h > ty * T + 14) spike = true;
   });
+  for (const lz of L.lasers) {
+    if (laserOn(lz) && Math.abs(p.x + p.w / 2 - lz.x) < 9 && p.y < lz.y1 && p.y + p.h > lz.y0) hurt();
+  }
   if (lava) { die(); sparkle(p.x + p.w / 2, p.y + p.h, '255,140,40'); }
   else if (spike && p.star === 0 && hurt()) p.vy = -8.5;
 
@@ -1654,6 +1864,7 @@ function updatePlayer() {
   });
 }
 
+const laserOn = lz => (tick + lz.off) % 150 < 70;
 function nearPlayer(x, y, rx, ry) { return !p.dead && Math.abs(x - (p.x + p.w / 2)) < rx && Math.abs(y - (p.y + p.h / 2)) < ry; }
 
 function updateWorld() {
@@ -1739,7 +1950,7 @@ function updateWorld() {
     f.life--;
     f.x += f.vx;
     if (solidAt(Math.floor(f.x / T), Math.floor(f.y / T))) { f.life = 0; sparkle(f.x, f.y, '255,140,40'); continue; }
-    f.vy = Math.min(f.vy + 0.45, 9); f.y += f.vy;
+    f.vy = Math.min(f.vy + 0.45 * L.gm, 9); f.y += f.vy;
     const fy = Math.floor((f.y + f.r) / T), fx = Math.floor(f.x / T);
     if (f.vy > 0 && (solidAt(fx, fy) || tileAt(fx, fy) === ONEWAY)) { f.y = fy * T - f.r; f.vy = -5.5; }
     for (const e of L.enemies) {
@@ -1817,6 +2028,7 @@ function drawBackground() {
   else if (W.bg === 'cave') bgCave(S);
   else if (W.bg === 'ice') bgIce(S);
   else if (W.bg === 'sky') bgSky(S);
+  else if (W.bg === 'space') bgSpace(S);
   else bgCastle(S);
 }
 
@@ -1945,6 +2157,20 @@ function peaks(par, col, base, seed, hMax) {
   }
   ctx.fillStyle = col; ctx.fillRect(0, by + 200, VW, VH);
 }
+function bgSpace(S) {
+  for (let i = 0; i < 120; i++) {
+    const x = ((hash(i, 1) * VW * 2 - cam.x * 0.03) % VW + VW) % VW, y = hash(i, 2) * VH * 0.8;
+    ctx.fillStyle = `rgba(255,255,255,${0.3 + 0.5 * Math.abs(Math.sin(tick * 0.03 + i))})`;
+    ctx.fillRect(x, y, hash(i, 3) > 0.85 ? 2 : 1.2, hash(i, 3) > 0.85 ? 2 : 1.2);
+  }
+  const px = VW * 0.72 - cam.x * 0.03, py = 140;
+  ctx.fillStyle = S.planet; ctx.beginPath(); ctx.arc(px, py, 64, 0, 6.283); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(px - 64, py - 10, 128, 14); ctx.fillRect(px - 60, py + 22, 120, 8);
+  ctx.strokeStyle = 'rgba(255,230,200,.55)'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.ellipse(px, py, 100, 22, -0.3, 0, 6.283); ctx.stroke();
+  hills(0.3, 430, 34, S.ridge[0], 0.012);
+  hills(0.5, 480, 24, S.ridge[1], 0.02);
+}
 function bgSky(S) {
   const sx = VW * 0.5 - cam.x * 0.02, sy = 130;
   // slow-turning sun rays
@@ -1980,8 +2206,8 @@ const looksSolid = t => t === SOLID || t === FAKE;
 function drawGround(tx, ty, x, y) {
   const S = W.ground;
   ctx.fillStyle = S.body; ctx.fillRect(x, y, T, T);
-  if (W.bg === 'castle') {
-    // bricks
+  if (W.bg === 'castle' || W.bg === 'space') {
+    // bricks / metal panels
     ctx.fillStyle = S.dot;
     ctx.fillRect(x, y + 15, T, 2);
     ctx.fillRect(x + (ty % 2 ? 8 : 22), y, 2, 15); ctx.fillRect(x + (ty % 2 ? 24 : 6), y + 17, 2, 15);
@@ -2314,6 +2540,7 @@ function drawBoss(b) {
   else if (b.kind === 'yeti') drawYeti(b, ph);
   else if (b.kind === 'knight') drawKnight(b, ph);
   else if (b.kind === 'dragon') drawDragon(b, ph);
+  else if (b.kind === 'ufo') drawUfo(b, ph);
   else drawKing(b, ph);
   ctx.restore();
 }
@@ -2444,66 +2671,48 @@ function drawKnight(b, ph) {
 }
 
 function drawDragon(b, ph) {
-  // Sun Phoenix: a fire bird whose flames get hotter (orange, pink, blue) each phase
-  const tired = b.mode === 'tired', flap = tired ? -0.6 : Math.sin(tick * 0.18);
-  const [hot, mid, pale] = ph === 1 ? ['#ff6a1a', '#ffb02e', '#fff1a8'] : ph === 2 ? ['#ff3d6e', '#ff8aa8', '#ffe0ea'] : ['#2f8cff', '#7fd0ff', '#eaf8ff'];
-  const glow = ph === 1 ? '255,170,60' : ph === 2 ? '255,90,140' : '90,180,255';
-  ctx.save(); ctx.scale(b.face, 1);
-  const aura = ctx.createRadialGradient(0, -34, 8, 0, -34, 80);
-  aura.addColorStop(0, `rgba(${glow},${tired ? 0.15 : 0.4})`); aura.addColorStop(1, `rgba(${glow},0)`);
-  ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(0, -34, 80, 0, 6.283); ctx.fill();
-  // flame tail: three long feathers waving behind
-  for (let i = 0; i < 3; i++) {
-    const wav = Math.sin(tick * 0.15 + i) * 8, len = 46 + i * 10;
-    ctx.fillStyle = i === 1 ? mid : hot;
-    ctx.beginPath(); ctx.moveTo(-18, -30 + i * 4);
-    ctx.quadraticCurveTo(-18 - len * 0.6, -40 + i * 10 + wav, -18 - len, -22 + i * 12 + wav);
-    ctx.quadraticCurveTo(-18 - len * 0.5, -20 + i * 6 + wav * 0.5, -14, -22 + i * 3);
-    ctx.closePath(); ctx.fill();
+  // Sky Eye: one big eye with spikes circling it; the iris changes colour each phase
+  const tired = b.mode === 'tired', iris = ph === 1 ? '#3fb8ff' : ph === 2 ? '#ff9a2e' : '#ff3d3d';
+  for (let i = 0; i < 6; i++) {
+    const a = tick * (tired ? 0.01 : 0.04) + i * Math.PI / 3;
+    ctx.save(); ctx.translate(Math.cos(a) * 44, -30 + Math.sin(a) * 34); ctx.rotate(a);
+    ctx.fillStyle = iris; ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(11, 0); ctx.lineTo(-5, -6); ctx.lineTo(-5, 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
   }
-  // back wing
-  const wing = (dx, s, col) => {
-    ctx.fillStyle = col; ctx.strokeStyle = 'rgba(60,20,10,.55)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(dx, -40);
-    ctx.quadraticCurveTo(dx - 20 * s, -76 * s - flap * 26, dx - 58 * s, -66 * s - flap * 34);
-    for (let k = 0; k < 4; k++) ctx.lineTo(dx - (50 - k * 12) * s, (-50 - flap * 24 + k * 6) * s + 4 + k * 3);
-    ctx.lineTo(dx - 6, -28); ctx.closePath(); ctx.fill(); ctx.stroke();
-  };
-  wing(4, 0.85, hot);
-  // body
-  ctx.fillStyle = mid; ctx.strokeStyle = 'rgba(60,20,10,.6)'; ctx.lineWidth = 2.5;
-  ctx.beginPath(); ctx.ellipse(0, -30, 24, 16, -0.15, 0, 6.283); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = pale; ctx.beginPath(); ctx.ellipse(6, -26, 13, 9, -0.2, 0, 6.283); ctx.fill();
-  // legs tucked under
-  ctx.strokeStyle = '#7a3a10'; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.moveTo(-4, -16); ctx.lineTo(-6, tired ? -2 : -8); ctx.moveTo(6, -16); ctx.lineTo(8, tired ? -2 : -8); ctx.stroke();
-  // neck and head
-  ctx.fillStyle = mid; ctx.strokeStyle = 'rgba(60,20,10,.6)'; ctx.lineWidth = 2.5;
-  ctx.beginPath(); ctx.ellipse(24, -44 + (tired ? 10 : 0), 13, 11, 0, 0, 6.283); ctx.fill(); ctx.stroke();
-  const hy = tired ? 10 : 0;
-  // flame crest
-  ctx.fillStyle = hot;
-  for (let i = 0; i < 3; i++) {
-    const w = Math.sin(tick * 0.25 + i) * 3;
-    ctx.beginPath(); ctx.moveTo(18 + i * 3, -52 + hy); ctx.quadraticCurveTo(10 + i * 4 + w, -70 - i * 3 + hy, 6 + i * 6 + w, -78 - i * 2 + hy);
-    ctx.quadraticCurveTo(18 + i * 4, -64 + hy, 24 + i * 2, -52 + hy); ctx.fill();
-  }
-  // beak
-  ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#7a3a10'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(34, -47 + hy); ctx.lineTo(46, -42 + hy); ctx.lineTo(34, -39 + hy); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(0, -30, 28, 0, 6.283); ctx.fill(); ctx.stroke();
   if (tired) {
-    ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(25, -46 + hy); ctx.lineTo(31, -42 + hy); ctx.moveTo(31, -46 + hy); ctx.lineTo(25, -42 + hy); ctx.stroke();
+    ctx.fillStyle = '#c9a0ff'; ctx.beginPath(); ctx.arc(0, -30, 28, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-28, -30); ctx.quadraticCurveTo(0, -18, 28, -30); ctx.stroke();
+    for (let i = 0; i < 3; i++) { const a = tick * 0.08 + i * 2.1; ctx.fillStyle = '#ffe14d'; starPath(Math.cos(a) * 20, -72 + Math.sin(a) * 5, 5, 2.2); ctx.fill(); }
   } else {
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(28, -46, 4, 4, 0, 0, 6.283); ctx.fill();
-    ctx.fillStyle = '#1b1b2f'; ctx.beginPath(); ctx.arc(29.5, -46, 2, 0, 6.283); ctx.fill();
+    const dx = clamp((p.x + p.w / 2 - (b.x + b.w / 2)) / 200, -1, 1) * 10, dy = clamp((p.y - b.y) / 200, -1, 1) * 8;
+    ctx.fillStyle = iris; ctx.beginPath(); ctx.arc(dx, -30 + dy, 14, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(dx, -30 + dy, 6, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(dx - 4, -34 + dy, 3, 0, 6.283); ctx.fill();
   }
-  // front wing over the body
-  wing(-2, 1, mid);
-  ctx.restore();
-  // embers drifting off
-  if (!tired && tick % 3 === 0) parts.push({ x: b.x + b.w / 2 + (Math.random() - .5) * 60, y: b.y + b.h / 2, vx: (Math.random() - .5), vy: -0.8 - Math.random(), life: 26, max: 26, r: 2.2, col: glow, g: -0.01 });
-  if (tired) for (let i = 0; i < 3; i++) { const a = tick * 0.08 + i * 2.1; ctx.fillStyle = '#ffe14d'; starPath(b.face * 26 + Math.cos(a) * 18, -78 + Math.sin(a) * 5, 5, 2.2); ctx.fill(); }
+}
+
+function drawUfo(b, ph) {
+  const tired = b.mode === 'tired', bob = tired ? 0 : Math.sin(tick * 0.1) * 2;
+  const light = ph === 1 ? '#7fe6ff' : ph === 2 ? '#ffd23f' : '#ff5d5d';
+  if (!tired) { ctx.fillStyle = 'rgba(127,230,255,.12)'; ctx.beginPath(); ctx.moveTo(-20, -8); ctx.lineTo(20, -8); ctx.lineTo(36, 60); ctx.lineTo(-36, 60); ctx.fill(); }
+  ctx.strokeStyle = '#14161e'; ctx.lineWidth = 2.5;
+  ctx.fillStyle = 'rgba(170,235,255,.8)'; ctx.beginPath(); ctx.ellipse(0, -28 + bob, 22, 18, 0, Math.PI, 0); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7ddf5f'; ctx.beginPath(); ctx.arc(0, -34 + bob, 8, 0, 6.283); ctx.fill();
+  if (tired) {
+    ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 1.5;
+    for (const ex of [-3, 3]) { ctx.beginPath(); ctx.moveTo(ex - 2, -37); ctx.lineTo(ex + 2, -33); ctx.moveTo(ex + 2, -37); ctx.lineTo(ex - 2, -33); ctx.stroke(); }
+  } else { ctx.fillStyle = '#111'; ctx.fillRect(-4, -37 + bob, 2.5, 3); ctx.fillRect(2, -37 + bob, 2.5, 3); }
+  ctx.strokeStyle = '#14161e'; ctx.lineWidth = 2.5;
+  ctx.fillStyle = '#9aa3b5'; ctx.beginPath(); ctx.ellipse(0, -20 + bob, 48, 12, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#5a6274'; ctx.beginPath(); ctx.ellipse(0, -15 + bob, 30, 6, 0, 0, 6.283); ctx.fill();
+  for (let i = 0; i < 6; i++) {
+    const on = !tired && (Math.floor(tick / 8) + i) % 2 === 0;
+    ctx.fillStyle = on ? light : '#3b4054'; ctx.beginPath(); ctx.arc(-35 + i * 14, -20 + bob, 3.5, 0, 6.283); ctx.fill();
+  }
+  if (tired) for (let i = 0; i < 3; i++) { const a = tick * 0.08 + i * 2.1; ctx.fillStyle = '#ffe14d'; starPath(Math.cos(a) * 22, -58 + Math.sin(a) * 5, 5, 2.2); ctx.fill(); }
 }
 
 function drawPlayer() {
@@ -2544,7 +2753,10 @@ function drawEffects() {
     ctx.beginPath(); ctx.moveTo(w.x - 6, w.y); ctx.quadraticCurveTo(w.x, w.y - 18, w.x + 6, w.y); ctx.fill();
   }
   for (const s of L.shots) {
-    if (s.kind === 'axe') {
+    if (s.kind === 'bomb') {
+      ctx.fillStyle = '#22252f'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+      ctx.fillStyle = Math.floor(tick / 4) % 2 ? '#ff5d5d' : '#ffd23f'; ctx.beginPath(); ctx.arc(s.x, s.y - s.r, 3, 0, 6.283); ctx.fill();
+    } else if (s.kind === 'axe') {
       ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(tick * 0.4 * Math.sign(s.vx || 1));
       ctx.fillStyle = '#6b4a2a'; ctx.fillRect(-2, -10, 4, 20);
       ctx.fillStyle = '#cfd6e2'; ctx.strokeStyle = '#14161e'; ctx.lineWidth = 1.5;
@@ -2596,8 +2808,26 @@ function drawEffects() {
     }
     ctx.stroke();
   }
+  for (const lz of L.lasers) {
+    if (lz.x < cam.x - 20 || lz.x > cam.x + VW + 20) continue;
+    const on = laserOn(lz), soon = !on && (tick + lz.off) % 150 > 125;
+    ctx.fillStyle = '#3b4054'; ctx.fillRect(lz.x - 8, lz.y0 - 6, 16, 8); ctx.fillRect(lz.x - 8, lz.y1 - 4, 16, 6);
+    if (on) {
+      ctx.fillStyle = 'rgba(255,60,120,.35)'; ctx.fillRect(lz.x - 8, lz.y0, 16, lz.y1 - lz.y0);
+      ctx.fillStyle = '#ff5d9a'; ctx.fillRect(lz.x - 3, lz.y0, 6, lz.y1 - lz.y0);
+      ctx.fillStyle = '#fff'; ctx.fillRect(lz.x - 1, lz.y0, 2, lz.y1 - lz.y0);
+    } else if (soon && Math.floor(tick / 3) % 2) {
+      ctx.fillStyle = 'rgba(255,93,154,.5)'; ctx.fillRect(lz.x - 1, lz.y0, 2, lz.y1 - lz.y0);
+    }
+  }
   for (const bo of L.bolts) {
     const gy = groundBelow(bo.x), top = cam.y - 10;
+    if (bo.laser) {
+      // UFO laser: thin warning line, then a straight thick beam
+      if (bo.warn > 0) { ctx.fillStyle = `rgba(127,230,255,${Math.floor(tick / 3) % 2 ? 0.6 : 0.25})`; ctx.fillRect(bo.x - 1.5, top, 3, gy - top); }
+      else { ctx.fillStyle = 'rgba(127,230,255,.35)'; ctx.fillRect(bo.x - 16, top, 32, gy - top); ctx.fillStyle = '#e6fbff'; ctx.fillRect(bo.x - 6, top, 12, gy - top); }
+      continue;
+    }
     if (bo.warn > 0) {
       ctx.strokeStyle = `rgba(255,240,120,${Math.floor(tick / 3) % 2 ? 0.55 : 0.25})`; ctx.lineWidth = 2; ctx.setLineDash([8, 8]);
       ctx.beginPath(); ctx.moveTo(bo.x, top); ctx.lineTo(bo.x, gy); ctx.stroke(); ctx.setLineDash([]);
@@ -2791,6 +3021,17 @@ if (store.get('v', 1) < 2) {
   }
   store.set('v', 2);
 }
+// v3 added levels 5 and 6 to every world and world 6, so boss levels moved from X-5 to X-7
+if (store.get('v', 1) < 3) {
+  const old = store.get('unlocked', 0);
+  store.set('unlocked', old >= 25 ? 35 : Math.floor(old / 5) * 7 + (old % 5 === 4 ? 6 : old % 5));
+  for (const w of [1, 2, 3, 4, 5]) for (const k of ['best.', 'big.']) {
+    const v = store.get(k + w + '-5', null);
+    if (v !== null) store.set(k + w + '-7', v);
+    try { localStorage.removeItem('skyhop.' + k + w + '-5'); } catch (e) { /* storage blocked */ }
+  }
+  store.set('v', 3);
+}
 let unlocked = store.get('unlocked', 0);
 
 // ---------- screens ----------
@@ -2801,7 +3042,7 @@ function show(name) { for (const k in scr) scr[k].hidden = k !== name; }
 function buildLevelButtons() {
   const box = $('levelBtns'); box.innerHTML = '';
   const current = Math.min(unlocked, LEVELS.length - 1);
-  for (const w of [1, 2, 3, 4, 5, 6]) {
+  for (const w of [1, 2, 3, 4, 5, 6, 7]) {
     const row = document.createElement('div'); row.className = 'wrow';
     const name = document.createElement('span'); name.className = 'wname'; name.textContent = WORLDS[w].name;
     row.appendChild(name);

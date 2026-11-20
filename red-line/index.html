@@ -93,6 +93,7 @@ kbd{font-family:var(--body);font-size:12px;background:rgba(0,0,0,.25);border:1px
       <button id="fence" class="btn2"><span id="fenceBuy"><span data-t="fence">Płotek</span> · 200 <span class="coin"></span></span><span id="fenceLock" hidden>🔒 <span data-t="fence">Płotek</span></span><span id="fenceCancel" hidden data-t="cancel_fence">Anuluj płotek</span> <kbd>3</kbd></button>
       <button id="turret" class="btn2"><span id="turretBuy"><span data-t="turret">Działko</span> · 150 <span class="coin"></span></span><span id="turretLock" hidden>🔒 <span data-t="turret">Działko</span></span><span id="turretCancel" hidden data-t="cancel_turret">Anuluj działko</span> <kbd>4</kbd></button>
       <button id="tank" class="btn2"><span id="tankBuy"><span data-t="tank">Czołg</span> · 350 <span class="coin"></span></span><span id="tankLock" hidden>🔒 <span data-t="tank">Czołg</span></span><span id="tankCancel" hidden data-t="cancel_tank">Anuluj czołg</span> <kbd>5</kbd></button>
+      <button id="rotBtn" class="btn2" hidden><span data-t="rotate">Obróć płotek</span> <kbd>Q</kbd></button>
       <button id="pauseBtn" class="btn2"><span data-t="pause">Pauza</span> <kbd>P</kbd></button>
       <button id="quit" class="btn2"><span data-t="quit">Wyjdź z kasą</span> · <b>+<span id="quitGain">0</span></b> <span class="coin"></span></button>
     </div>
@@ -133,11 +134,13 @@ pl:{
   keys:`${K('LPM')} na żołnierzu lub czołgu: wybierz · ${K('W')}${K('A')}${K('S')}${K('D')} ruch · ${K('LPM')} strzał (przytrzymaj) · ${K('R')} przeładuj<br>
     Czołg: ${K('LPM')} karabin maszynowy · ${K('Spacja')} armata · ${K('Tab')} następny · ${K('PPM')} / ${K('Esc')} puść<br>
     Chłop (${K(6)}) bije widłami, gdy klikasz ${K('LPM')} · Płotek, działko, czołg: kliknij przycisk (${K(3)} ${K(4)} ${K(5)}), potem ${K('PPM')} postaw · ${K('Q')} lub kółko myszy: obróć płotek<br>
+    Tablet: dotknij żołnierza · lewa gałka: ruch · prawa gałka: przytrzymaj, celuj i strzelaj · dotknij go jeszcze raz, żeby puścić<br>
     Wyjście lub przegrana: połowa monet, które masz, idzie do banku. Za bank w menu odblokowujesz chłopa, płotek, działko i czołg.`,
   desc_farmer:'75 HP, bije widłami (5 HP). Liczy się do limitu 10 żołnierzy.', desc_fence:'500 HP, zatrzymuje zombie. Obrót: Q lub kółko myszy.', desc_turret:'Karabin maszynowy, strzela sam. 300 HP.', desc_tank:'Karabin maszynowy i armata (Spacja). 400 HP.',
   inGame:c=>`W grze: ${c} monet za sztukę.`, forkAmmo:'widły', unlocked:'Odblokowane ✓', unlock:'Odblokuj', unlockInMenu:'Odblokuj w menu',
   line:'LINIA OBRONY', waveStart:n=>`Fala ${n}: horda!`, waveDone:n=>`Fala ${n} odparta`, nextWave:n=>`Następna fala za ${n} s`,
-  clickHint:'Kliknij żołnierza, żeby nim sterować',
+  clickHint:'Kliknij żołnierza, żeby nim sterować', tapHint:'Dotknij żołnierza, żeby nim sterować',
+  stickMove:'ruch', stickAim:'strzał', rotate:'Obróć płotek', tapPlace:'Dotknij, gdzie postawić',
   place:k=>`PPM: postaw ${({fence:'płotek',turret:'działko',tank:'czołg'})[k]}${k==='fence'?' · Q / kółko: obróć':''} · Esc: anuluj`, cantPlace:'Tu nie można postawić',
   tankDead:'Czołg zniszczony', soldierDead:'Żołnierz poległ', farmerDead:'Chłop poległ', newSoldier:'Nowy żołnierz', newFarmer:'Nowy chłop', fenceDead:'Płotek zniszczony', turretDead:'Działko zniszczone',
   reloading:'przeład.', cannonWait:' · armata…', cannonOk:' · armata ✓',
@@ -157,11 +160,13 @@ en:{
   keys:`${K('LMB')} on a soldier or tank: select · ${K('W')}${K('A')}${K('S')}${K('D')} move · ${K('LMB')} shoot (hold) · ${K('R')} reload<br>
     Tank: ${K('LMB')} machine gun · ${K('Space')} cannon · ${K('Tab')} next · ${K('RMB')} / ${K('Esc')} let go<br>
     Farmer (${K(6)}) hits with a pitchfork when you click ${K('LMB')} · Fence, turret, tank: click the button (${K(3)} ${K(4)} ${K(5)}), then ${K('RMB')} to place · ${K('Q')} or mouse wheel: rotate the fence<br>
+    Tablet: tap a soldier · left stick: move · right stick: hold to aim and shoot · tap the soldier again to let go<br>
     Cash out or lose: half of the coins you have goes to the bank. Use the bank in the menu to unlock the farmer, fence, turret and tank.`,
   desc_farmer:'75 HP, hits with a pitchfork (5 HP). Counts toward the 10-soldier limit.', desc_fence:'500 HP, stops zombies. Rotate: Q or mouse wheel.', desc_turret:'Machine gun, shoots by itself. 300 HP.', desc_tank:'Machine gun and cannon (Space). 400 HP.',
   inGame:c=>`In the game: ${c} coins each.`, forkAmmo:'pitchfork', unlocked:'Unlocked ✓', unlock:'Unlock', unlockInMenu:'Unlock in the menu',
   line:'DEFENSE LINE', waveStart:n=>`Wave ${n}: horde!`, waveDone:n=>`Wave ${n} cleared`, nextWave:n=>`Next wave in ${n} s`,
-  clickHint:'Click a soldier to control it',
+  clickHint:'Click a soldier to control it', tapHint:'Tap a soldier to control it',
+  stickMove:'move', stickAim:'shoot', rotate:'Rotate fence', tapPlace:'Tap where to place it',
   place:k=>`RMB: place ${k}${k==='fence'?' · Q / wheel: rotate':''} · Esc: cancel`, cantPlace:"You can't place it here",
   tankDead:'Tank destroyed', soldierDead:'Soldier down', farmerDead:'Farmer down', newSoldier:'New soldier', newFarmer:'New farmer', fenceDead:'Fence destroyed', turretDead:'Turret destroyed',
   reloading:'reloading', cannonWait:' · cannon…', cannonOk:' · cannon ✓',
@@ -452,10 +457,15 @@ function update(dt){
       let mx=0,my=0;
       if(keys.KeyW||keys.ArrowUp)my--; if(keys.KeyS||keys.ArrowDown)my++;
       if(keys.KeyA||keys.ArrowLeft)mx--; if(keys.KeyD||keys.ArrowRight)mx++;
-      if(mx||my){const l=Math.hypot(mx,my), v=s.tank?SPEED*.75:SPEED; s.x+=mx/l*v*dt; s.y+=my/l*v*dt; s.walk+=dt*12; turnHull(s,mx,my,dt)}
-      s.ang=Math.atan2(mouse.y-s.y,mouse.x-s.x);
-      if(mouse.down){ if(s.farmer) stab(s); else shoot(s,s.tank?.03:.035,s.tank?TANK_MG_RATE:.11) }
-      if(s.tank&&keys.Space) fireShell(s);
+      if(mx||my){const l=Math.hypot(mx,my); mx/=l; my/=l}
+      const mv=stickVec('move'), am=stickVec('aim');
+      if(mv&&mv.l>.15){mx=mv.x; my=mv.y}
+      if(mx||my){const v=s.tank?SPEED*.75:SPEED; s.x+=mx*v*dt; s.y+=my*v*dt; s.walk+=dt*12; turnHull(s,mx,my,dt)}
+      const aiming=am&&am.l>.25;
+      if(aiming) s.ang=Math.atan2(am.y,am.x);
+      else if(!touchMode) s.ang=Math.atan2(mouse.y-s.y,mouse.x-s.x);
+      if(mouse.down||aiming){ if(s.farmer) stab(s); else shoot(s,s.tank?.03:.035,s.tank?TANK_MG_RATE:.11) }
+      if(s.tank&&(keys.Space||aiming)) fireShell(s);
     } else if(s.farmer){
       // AI farmer: run at the nearest zombie and stab it, otherwise wait at its spot
       let near=null, nd=1e9;
@@ -743,7 +753,7 @@ function draw(){
     else if(sel.mag>20){bar(sel.x,sel.y+sel.r+12,44,sel.reload>0?0:sel.ammo/sel.mag,'#f2c14e'); if(sel.shellCd<=0) C(ctx,sel.x+28,sel.y+sel.r+13.5,3,'#ff9b3d')}
     else for(let i=0;i<sel.mag;i++){ctx.fillStyle=i<sel.ammo&&sel.reload<=0?'#f2c14e':'rgba(255,255,255,.18)';ctx.fillRect(sel.x-sel.mag*1.75+i*3.5,sel.y+sel.r+12,2.5,6)}
     if(sel.reload>0){ctx.strokeStyle='#f2c14e';ctx.lineWidth=3;ctx.beginPath();ctx.arc(sel.x,sel.y,sel.r+12,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-sel.reload/sel.reloadTime));ctx.stroke()}
-    if(mode==='play'){
+    if(mode==='play'&&!touchMode){
       ctx.strokeStyle='rgba(242,193,78,.85)'; ctx.lineWidth=1.5;
       ctx.beginPath(); ctx.arc(mouse.x,mouse.y,9,0,Math.PI*2); ctx.stroke();
       L(ctx,mouse.x-14,mouse.y,mouse.x-5,mouse.y,'rgba(242,193,78,.85)',1.5); L(ctx,mouse.x+5,mouse.y,mouse.x+14,mouse.y,'rgba(242,193,78,.85)',1.5);
@@ -764,7 +774,7 @@ function draw(){
     else {drawTurret(gh,true); ctx.beginPath(); ctx.arc(gh.x,gh.y,gh.r+4,0,Math.PI*2); ctx.stroke();
       ctx.strokeStyle='rgba(242,193,78,.25)'; ctx.setLineDash([4,6]); ctx.beginPath(); ctx.arc(gh.x,gh.y,TURRET_RANGE,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([])}
     ctx.font='600 15px Rubik, system-ui, sans-serif'; ctx.fillStyle='#f2c14e';
-    ctx.fillText(ok?T.place(S.placing):T.cantPlace,W/2,H-10);
+    ctx.fillText(touchMode?T.tapPlace:ok?T.place(S.placing):T.cantPlace,W/2,H-10);
   }
   for(const f of S.floats){ctx.globalAlpha=clamp(f.t,0,1);ctx.font='700 15px Rubik, system-ui, sans-serif';ctx.fillStyle='#000';ctx.fillText(f.text,f.x+1,f.y+1);ctx.fillStyle=f.c;ctx.fillText(f.text,f.x,f.y)}
   ctx.globalAlpha=1;
@@ -785,9 +795,17 @@ function draw(){
     ctx.font='600 16px Rubik, system-ui, sans-serif'; ctx.fillStyle='rgba(236,230,214,.8)';
     ctx.fillText(T.nextWave(Math.ceil(S.breakT)),W/2,170);
   }
-  if(!sel&&!S.placing&&mode==='play'&&S.time<12){
+  if(!sel&&!S.placing&&mode==='play'&&(S.time<12||touchMode)){
     ctx.font='600 15px Rubik, system-ui, sans-serif'; ctx.fillStyle='rgba(242,193,78,.9)';
-    ctx.fillText(T.clickHint,W/2,H-10);
+    ctx.fillText(touchMode?T.tapHint:T.clickHint,W/2,H-10);
+  }
+  if(touchMode&&sel&&mode==='play') for(const k in STICK_POS){
+    const b=STICK_POS[k], v=stickVec(k)||{x:0,y:0};
+    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.arc(b.x,b.y,STICK_R,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=k==='aim'?'rgba(255,110,90,.7)':'rgba(242,193,78,.6)'; ctx.lineWidth=2; ctx.stroke();
+    C(ctx,b.x+v.x*STICK_R,b.y+v.y*STICK_R,24,k==='aim'?(sticks.aim?'rgba(255,110,90,.85)':'rgba(255,110,90,.5)'):'rgba(242,193,78,.6)');
+    ctx.font='600 13px Rubik, system-ui, sans-serif'; ctx.fillStyle='rgba(236,230,214,.8)';
+    ctx.fillText(k==='aim'?T.stickAim:T.stickMove,b.x,b.y+STICK_R+18);
   }
 }
 
@@ -811,6 +829,7 @@ function hud(){
     $(k).title=open?'':T.unlockInMenu;
     $(k+'Buy').hidden=on||!open; $(k+'Lock').hidden=open; $(k+'Cancel').hidden=!on;
   }
+  $('rotBtn').hidden=!(mode==='play'&&S.placing==='fence');
   $('pauseBtn').disabled=mode!=='play'&&mode!=='pause';
   $('quit').disabled=mode!=='play'&&mode!=='pause';
   set('quitGain',payout());
@@ -944,8 +963,34 @@ $('pauseBtn').onclick=()=>{setPause(mode==='play')};
 $('quit').onclick=quitGame;
 
 // ---- Input ----
+// touch: two fixed sticks on the roofs, left moves, right aims and shoots while held
+let touchMode=!!(window.matchMedia&&matchMedia('(pointer: coarse)').matches);
+const STICK_R=60, sticks={move:null,aim:null};
+const STICK_POS={move:{x:130,y:H-120},aim:{x:W-130,y:H-120}};
+function stickVec(k){
+  const t=sticks[k]; if(!t) return null;
+  let x=(t.x-STICK_POS[k].x)/STICK_R, y=(t.y-STICK_POS[k].y)/STICK_R; const l=Math.hypot(x,y);
+  if(l>1){x/=l;y/=l}
+  return {x,y,l:Math.min(1,l)};
+}
+function touchDown(e){
+  touchMode=true; const p=toGame(e);
+  if(mode!=='play') return;
+  if(S.selected) for(const k in STICK_POS)
+    if(!sticks[k]&&Math.hypot(p.x-STICK_POS[k].x,p.y-STICK_POS[k].y)<STICK_R*1.6){
+      sticks[k]={id:e.pointerId,x:p.x,y:p.y}; try{cv.setPointerCapture(e.pointerId)}catch(_){}
+      return;
+    }
+  if(S.placing){mouse.x=p.x; mouse.y=p.y; placeBuild(); return}
+  let hit=null, hd=1e9;
+  for(const s of live()){const d=Math.hypot(s.x-p.x,s.y-p.y); if(d<s.r+16&&d<hd){hd=d;hit=s}}
+  if(hit) S.selected=hit===S.selected?null:hit;
+}
+function touchEnd(e){for(const k in sticks) if(sticks[k]&&sticks[k].id===e.pointerId) sticks[k]=null}
 function toGame(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
 cv.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch'){e.preventDefault(); touchDown(e); return}
+  touchMode=false;
   cv.focus(); const p=toGame(e); mouse.x=p.x; mouse.y=p.y;
   if(mode!=='play') return;
   if(e.button===2){ if(S.placing) placeBuild(); else S.selected=null; return }
@@ -955,9 +1000,14 @@ cv.addEventListener('pointerdown',e=>{
   if(hit&&hit!==S.selected){S.selected=hit; mouse.down=false; return}
   if(S.selected){mouse.down=true; try{cv.setPointerCapture(e.pointerId)}catch(_){}}
 });
-cv.addEventListener('pointermove',e=>{const p=toGame(e); mouse.x=p.x; mouse.y=p.y});
-cv.addEventListener('pointerup',()=>{mouse.down=false});
-cv.addEventListener('pointercancel',()=>{mouse.down=false});
+cv.addEventListener('pointermove',e=>{
+  const p=toGame(e);
+  if(e.pointerType==='touch'){for(const k in sticks) if(sticks[k]&&sticks[k].id===e.pointerId){sticks[k].x=p.x; sticks[k].y=p.y} return}
+  mouse.x=p.x; mouse.y=p.y;
+});
+cv.addEventListener('pointerup',e=>{if(e.pointerType==='touch') touchEnd(e); else mouse.down=false});
+cv.addEventListener('pointercancel',e=>{touchEnd(e); mouse.down=false});
+$('rotBtn').onclick=()=>{S.fenceRot=1-S.fenceRot};
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('wheel',e=>{ if(mode==='play'&&S.placing==='fence'){e.preventDefault(); S.fenceRot=1-S.fenceRot} },{passive:false});
 const GAME_KEYS=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Tab','Space'];

@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Red Line</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rubik:wght@400;600;700&display=swap">
+<style>
+/* Layout: one column — title row, HUD strip, game board (3:2), shop + controls below */
+:root{
+  --bg:#13120e; --panel:#1e1c16; --line:#3a362b; --fg:#ece6d6; --muted:#a39b86;
+  --red:#d9302a; --gold:#f2c14e;
+  --display:"Black Ops One", Impact, "Arial Black", sans-serif;
+  --body:"Rubik", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,44px);margin:0;letter-spacing:.04em;line-height:1}
+h1 span{color:var(--red)}
+.headr{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lang{padding:4px 10px;font-size:13px}
+.tag{color:var(--muted);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.hud{display:flex;flex-wrap:wrap;gap:8px}
+.stat{background:var(--panel);border:1px solid var(--line);padding:6px 12px;display:flex;gap:8px;align-items:baseline;font-variant-numeric:tabular-nums}
+.stat b{font-size:18px}
+.stat small{color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+.coin{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:inset 0 0 0 2px #b8862a;align-self:center}
+.board{position:relative;width:100%;max-width:100%;aspect-ratio:3/2;border:2px solid var(--line);background:var(--bg)}
+canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
+canvas:focus{outline:none}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:14px;background:rgba(12,11,8,.85);text-align:center;padding:16px;overflow:auto}
+.menu{display:grid;gap:8px;width:min(600px,100%)}
+.bank{font-size:18px;display:flex;gap:8px;align-items:center;justify-content:center}
+.bank b{color:var(--gold);font-size:22px}
+.item{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:center;background:var(--panel);border:1px solid var(--line);padding:8px 10px;text-align:left}
+.item small{color:var(--muted);display:block;font-size:12px;line-height:1.4}
+.take{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;font-size:14px}
+.take button{padding:4px 10px}
+.item .buy{padding:8px 12px}
+.overlay h2{font-family:var(--display);font-weight:400;font-size:clamp(26px,5vw,52px);margin:0;letter-spacing:.04em;text-wrap:balance}
+.overlay p{margin:0;max-width:52ch;line-height:1.55}
+.overlay .small{color:var(--muted);font-size:14px}
+button{font:inherit;font-weight:600;background:var(--red);color:#fff;border:0;padding:10px 18px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+button:hover{filter:brightness(1.1)}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed;filter:none}
+.btn2{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
+.bottom{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;align-items:flex-start}
+.shop{display:flex;flex-wrap:wrap;gap:8px}
+.keys{color:var(--muted);font-size:13px;line-height:1.8;min-width:0}
+kbd{font-family:var(--body);font-size:12px;background:rgba(0,0,0,.25);border:1px solid var(--line);padding:0 6px;color:var(--fg)}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1 data-t="h1">Czerwona <span>Linia</span></h1>
+    <div class="headr"><div class="tag" data-t="tag">Utrzymaj ulicę. Żaden zombie nie może przejść.</div><button id="langBtn" class="btn2 lang" aria-label="Language / Język">EN</button></div>
+  </header>
+
+  <div class="hud">
+    <div class="stat"><span class="coin"></span><b id="coins">0</b><small data-t="s_coins">monety</small></div>
+    <div class="stat"><b id="wave">0</b><small data-t="s_wave">fala</small></div>
+    <div class="stat"><b id="kills">0</b><small data-t="s_kills">zabite</small></div>
+    <div class="stat"><b id="squad">5</b><small data-t="s_squad">żołnierze</small></div>
+    <div class="stat"><b id="ammo">—</b><small data-t="s_ammo">amunicja</small></div>
+  </div>
+
+  <div class="board">
+    <canvas id="game" tabindex="0" aria-label="Czerwona Linia"></canvas>
+    <div class="overlay" id="ov">
+      <h2 id="ovTitle">Czerwona Linia</h2>
+      <p id="ovText"></p>
+      <p class="small" id="ovSmall"></p>
+      <div class="menu" id="menu" hidden>
+        <div class="bank"><span class="coin"></span> <span data-t="bank">Bank:</span> <b id="bank">0</b></div>
+        <div id="items"></div>
+      </div>
+      <button id="ovBtn">Start</button>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="shop">
+      <button id="hire"><span data-t="soldier">Żołnierz</span> · 100 <span class="coin"></span> <kbd>1</kbd></button>
+      <button id="hireHeavy"><span data-t="heavy">Ciężki żołnierz</span> · 200 <span class="coin"></span> <kbd>2</kbd></button>
+      <button id="fence" class="btn2"><span id="fenceBuy"><span data-t="fence">Płotek</span> · 200 <span class="coin"></span></span><span id="fenceLock" hidden>🔒 <span data-t="fence">Płotek</span></span><span id="fenceCancel" hidden data-t="cancel_fence">Anuluj płotek</span> <kbd>3</kbd></button>
+      <button id="turret" class="btn2"><span id="turretBuy"><span data-t="turret">Działko</span> · 150 <span class="coin"></span></span><span id="turretLock" hidden>🔒 <span data-t="turret">Działko</span></span><span id="turretCancel" hidden data-t="cancel_turret">Anuluj działko</span> <kbd>4</kbd></button>
+      <button id="tank" class="btn2"><span id="tankBuy"><span data-t="tank">Czołg</span> · 350 <span class="coin"></span></span><span id="tankLock" hidden>🔒 <span data-t="tank">Czołg</span></span><span id="tankCancel" hidden data-t="cancel_tank">Anuluj czołg</span> <kbd>5</kbd></button>
+      <button id="pauseBtn" class="btn2"><span data-t="pause">Pauza</span> <kbd>P</kbd></button>
+      <button id="quit" class="btn2"><span data-t="quit">Wyjdź z kasą</span> · <b>+<span id="quitGain">0</span></b> <span class="coin"></span></button>
+    </div>
+    <div class="keys" data-t="keys"></div>
+  </div>
+</div>
+
+<script>
+// ---- Rules ----
+const W=960,H=640,BT=230,GL=290,GR=670,LINE_Y=560;
+const BLD=[{x:0,y:BT,w:GL,h:H-BT},{x:GR,y:BT,w:W-GR,h:H-BT}];
+const MAG=10, RELOAD=0.5, DMG=10, ZDPS=5, SOLDIER_HP=100;
+const HEAVY_HP=150, HEAVY_MAG=15, HEAVY_RELOAD=1.5;
+const HIRE_COST=100, HEAVY_COST=200, MAX_SQUAD=10;
+const WAVE_STEP=150, MAX_ALIVE=300; // more zombies wait off-screen so the game stays smooth
+const FENCE_HP=500, FENCE_LEN=80, FENCE_T=12;
+const TURRET_HP=300, TURRET_MAG=50, TURRET_RELOAD=2, TURRET_RATE=.08, TURRET_RANGE=280, TURRET_R=16;
+const TANK_HP=400, TANK_R=22, TANK_MAG=60, TANK_MG_RELOAD=2, TANK_MG_RATE=.07, TANK_AI_RATE=.12;
+const SHELL_RELOAD=3, SHELL_DMG=60, SPLASH=55, SHELL_SPEED=700;
+// unlocked once in the menu with bank money, then bought in the game with coins (same price)
+const ITEMS={
+  fence:{cost:200}, turret:{cost:150}, tank:{cost:350}
+};
+
+// ---- Texts (Polish and English) ----
+const K=k=>`<kbd>${k}</kbd>`;
+const LANGS={
+pl:{
+  title:'Czerwona Linia', h1:'Czerwona <span>Linia</span>', tag:'Utrzymaj ulicę. Żaden zombie nie może przejść.',
+  s_coins:'monety', s_wave:'fala', s_kills:'zabite', s_squad:'żołnierze', s_ammo:'amunicja', bank:'Bank:',
+  soldier:'Żołnierz', heavy:'Ciężki żołnierz', fence:'Płotek', turret:'Działko', tank:'Czołg',
+  cancel_fence:'Anuluj płotek', cancel_turret:'Anuluj działko', cancel_tank:'Anuluj czołg',
+  pause:'Pauza', quit:'Wyjdź z kasą',
+  keys:`${K('LPM')} na żołnierzu lub czołgu: wybierz · ${K('W')}${K('A')}${K('S')}${K('D')} ruch · ${K('LPM')} strzał (przytrzymaj) · ${K('R')} przeładuj<br>
+    Czołg: ${K('LPM')} karabin maszynowy · ${K('Spacja')} armata · ${K('Tab')} następny · ${K('PPM')} / ${K('Esc')} puść<br>
+    Płotek, działko, czołg: kliknij przycisk (${K(3)} ${K(4)} ${K(5)}), potem ${K('PPM')} postaw · ${K('Q')} lub kółko myszy: obróć płotek<br>
+    Wyjście lub przegrana: połowa monet, które masz, idzie do banku. Za bank w menu odblokowujesz płotek, działko i czołg.`,
+  desc_fence:'500 HP, zatrzymuje zombie. Obrót: Q lub kółko myszy.', desc_turret:'Karabin maszynowy, strzela sam. 300 HP.', desc_tank:'Karabin maszynowy i armata (Spacja). 400 HP.',
+  inGame:c=>`W grze: ${c} monet za sztukę.`, unlocked:'Odblokowane ✓', unlock:'Odblokuj', unlockInMenu:'Odblokuj w menu',
+  line:'LINIA OBRONY', waveStart:n=>`Fala ${n}: horda!`, waveDone:n=>`Fala ${n} odparta`, nextWave:n=>`Następna fala za ${n} s`,
+  clickHint:'Kliknij żołnierza, żeby nim sterować',
+  place:k=>`PPM: postaw ${({fence:'płotek',turret:'działko',tank:'czołg'})[k]}${k==='fence'?' · Q / kółko: obróć':''} · Esc: anuluj`, cantPlace:'Tu nie można postawić',
+  tankDead:'Czołg zniszczony', soldierDead:'Żołnierz poległ', newSoldier:'Nowy żołnierz', fenceDead:'Płotek zniszczony', turretDead:'Działko zniszczone',
+  reloading:'przeład.', cannonWait:' · armata…', cannonOk:' · armata ✓',
+  menuText:'Na czerwoną linię powoli idzie gigantyczna horda zombie. Żaden nie może jej przekroczyć. Co falę przychodzi o 150 zombie więcej.',
+  menuSmall:b=>`Rekord: ${b} fal · W grze za monety kupujesz żołnierzy (100), ciężkich żołnierzy (200, najwyżej 10 żołnierzy naraz) i rzeczy odblokowane w menu. Po wyjściu lub przegranej połowa monet, które masz, trafia do banku.`,
+  paused:'Pauza', pausedText:'Gra czeka na ciebie.', resume:'Graj dalej',
+  endSmall:(w,k,g,c,b)=>`Odparte fale: ${w} · Zabite zombie: ${k} · Do banku: +${g} (połowa z ${c}) · Bank: ${b}`,
+  lineBroken:'Linia przerwana', lineBrokenText:'Zombie przeszedł przez czerwoną linię.', squadDead:'Oddział poległ', squadDeadText:'Wszyscy żołnierze zginęli.',
+  retreat:'Wycofanie', retreatText:'Oddział wycofał się z kasą.'
+},
+en:{
+  title:'Red Line', h1:'Red <span>Line</span>', tag:'Hold the street. No zombie gets through.',
+  s_coins:'coins', s_wave:'wave', s_kills:'kills', s_squad:'soldiers', s_ammo:'ammo', bank:'Bank:',
+  soldier:'Soldier', heavy:'Heavy soldier', fence:'Fence', turret:'Turret', tank:'Tank',
+  cancel_fence:'Cancel fence', cancel_turret:'Cancel turret', cancel_tank:'Cancel tank',
+  pause:'Pause', quit:'Cash out',
+  keys:`${K('LMB')} on a soldier or tank: select · ${K('W')}${K('A')}${K('S')}${K('D')} move · ${K('LMB')} shoot (hold) · ${K('R')} reload<br>
+    Tank: ${K('LMB')} machine gun · ${K('Space')} cannon · ${K('Tab')} next · ${K('RMB')} / ${K('Esc')} let go<br>
+    Fence, turret, tank: click the button (${K(3)} ${K(4)} ${K(5)}), then ${K('RMB')} to place · ${K('Q')} or mouse wheel: rotate the fence<br>
+    Cash out or lose: half of the coins you have goes to the bank. Use the bank in the menu to unlock the fence, turret and tank.`,
+  desc_fence:'500 HP, stops zombies. Rotate: Q or mouse wheel.', desc_turret:'Machine gun, shoots by itself. 300 HP.', desc_tank:'Machine gun and cannon (Space). 400 HP.',
+  inGame:c=>`In the game: ${c} coins each.`, unlocked:'Unlocked ✓', unlock:'Unlock', unlockInMenu:'Unlock in the menu',
+  line:'DEFENSE LINE', waveStart:n=>`Wave ${n}: horde!`, waveDone:n=>`Wave ${n} cleared`, nextWave:n=>`Next wave in ${n} s`,
+  clickHint:'Click a soldier to control it',
+  place:k=>`RMB: place ${k}${k==='fence'?' · Q / wheel: rotate':''} · Esc: cancel`, cantPlace:"You can't place it here",
+  tankDead:'Tank destroyed', soldierDead:'Soldier down', newSoldier:'New soldier', fenceDead:'Fence destroyed', turretDead:'Turret destroyed',
+  reloading:'reloading', cannonWait:' · cannon…', cannonOk:' · cannon ✓',
+  menuText:'A giant zombie horde is slowly walking toward the red line. None of them may cross it. Every wave brings 150 more zombies.',
+  menuSmall:b=>`Best: ${b} waves · In the game, spend coins on soldiers (100), heavy soldiers (200, at most 10 soldiers at once) and items you unlocked in the menu. When you cash out or lose, half of the coins you have goes to the bank.`,
+  paused:'Paused', pausedText:'The game is waiting for you.', resume:'Resume',
+  endSmall:(w,k,g,c,b)=>`Waves held: ${w} · Zombies killed: ${k} · To bank: +${g} (half of ${c}) · Bank: ${b}`,
+  lineBroken:'Line broken', lineBrokenText:'A zombie crossed the red line.', squadDead:'Squad wiped out', squadDeadText:'All soldiers are dead.',
+  retreat:'Retreat', retreatText:'The squad retreated with the cash.'
+}};
+const LANG_KEY='czerwona-linia-lang';
+let lang='pl';
+try{lang=localStorage.getItem(LANG_KEY)||''}catch(e){}
+// on the public website the game starts in English
+if(!LANGS[lang]) lang=location.hostname.endsWith('github.io')?'en':'pl';
+let T=LANGS[lang];
+function applyLang(){
+  document.documentElement.lang=lang; document.title=T.title;
+  $('game').setAttribute('aria-label',T.title);
+  for(const e of document.querySelectorAll('[data-t]')) e.innerHTML=T[e.dataset.t];
+  $('langBtn').textContent=lang==='pl'?'EN':'PL';
+}
+function setLang(l){
+  lang=l; T=LANGS[l]; try{localStorage.setItem(LANG_KEY,l)}catch(e){}
+  applyLang(); bg=makeBg();
+  if(mode==='menu') showMenu();
+  else if(mode==='pause') showOverlay(T.paused,T.pausedText,'',T.resume);
+}
+const SPEED=150, BULLET_SPEED=950, AI_RANGE=260, AI_RATE=.5, AI_SPREAD=.1, AI_SPEED=110, AGGRO=170;
+
+const $=id=>document.getElementById(id);
+const rand=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function angDiff(a,b){let d=b-a;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return d}
+function turnHull(s,mx,my,dt){s.hull+=angDiff(s.hull,Math.atan2(my,mx))*Math.min(1,dt*6)}
+
+const cv=$('game'), ctx=cv.getContext('2d');
+const dpr=Math.min(2,window.devicePixelRatio||1);
+cv.width=W*dpr; cv.height=H*dpr;
+const decal=document.createElement('canvas'); decal.width=W; decal.height=H;
+const dctx=decal.getContext('2d');
+
+// ---- Drawing helpers ----
+function E(g,x,y,rx,ry,c){g.fillStyle=c;g.beginPath();g.ellipse(x,y,rx,ry,0,0,Math.PI*2);g.fill()}
+function C(g,x,y,r,c){E(g,x,y,r,r,c)}
+function L(g,x1,y1,x2,y2,c,w){g.strokeStyle=c;g.lineWidth=w;g.lineCap='round';g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke()}
+function RR(g,x,y,w,h,r,c){g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,r);g.fill()}
+
+// ---- Background (drawn once) ----
+let bg;
+function makeBg(){
+  const c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d');
+  g.fillStyle='#46512f'; g.fillRect(0,0,W,H);
+  for(let i=0;i<16;i++){g.fillStyle='rgba(95,78,50,.35)';g.beginPath();g.ellipse(rand(0,W),rand(0,BT),rand(20,70),rand(10,25),rand(0,3),0,7);g.fill()}
+  for(let i=0;i<3200;i++){const r=Math.random();g.fillStyle=r<.5?'rgba(28,38,16,.4)':r<.8?'rgba(120,135,75,.35)':'rgba(95,78,48,.45)';g.fillRect(rand(0,W),rand(0,BT+20),rand(1,3),rand(1,3))}
+
+  // street between the buildings
+  const rg=g.createLinearGradient(0,BT-80,0,BT); rg.addColorStop(0,'rgba(52,51,47,0)'); rg.addColorStop(1,'#34332f');
+  g.fillStyle=rg; g.fillRect(GL,BT-80,GR-GL,80);
+  g.fillStyle='#34332f'; g.fillRect(GL,BT,GR-GL,H-BT);
+  for(let i=0;i<3500;i++){g.fillStyle=Math.random()<.5?'rgba(0,0,0,.3)':'rgba(255,255,255,.06)';g.fillRect(rand(GL,GR),rand(BT-30,H),1.2,1.2)}
+  for(const x of [GL,GR-16]){
+    g.fillStyle='#5f5b52'; g.fillRect(x,BT,16,H-BT);
+    g.strokeStyle='rgba(0,0,0,.35)'; g.lineWidth=1;
+    for(let y=BT;y<H;y+=18){g.beginPath();g.moveTo(x,y);g.lineTo(x+16,y);g.stroke()}
+    g.fillStyle='#7a766b'; g.fillRect(x===GL?GL+16:GR-18,BT,2,H-BT);
+  }
+  g.fillStyle='rgba(230,220,180,.3)'; for(let y=BT+10;y<H;y+=42) g.fillRect(W/2-2,y,4,20);
+  g.strokeStyle='rgba(0,0,0,.5)'; g.lineWidth=1;
+  for(let i=0;i<12;i++){let x=rand(GL+20,GR-20),y=rand(BT,H);g.beginPath();g.moveTo(x,y);for(let k=0;k<5;k++){x+=rand(-12,12);y+=rand(-12,12);g.lineTo(x,y)}g.stroke()}
+  g.fillStyle='rgba(200,40,30,.22)'; g.fillRect(GL+18,LINE_Y-10,GR-GL-36,20);
+  g.save(); g.fillStyle='rgba(230,220,200,.13)'; g.font='28px "Black Ops One", Impact, sans-serif'; g.textAlign='center';
+  g.fillText(T.line,W/2,LINE_Y+40); g.restore();
+
+  // shadow of the left building on the street (light from top-left)
+  g.fillStyle='rgba(0,0,0,.3)'; g.fillRect(GL,BT+6,14,H-BT);
+  roof(g,0,BT,GL,H-BT,'#5b6068','#4a4f56');
+  roof(g,GR,BT,W-GR,H-BT,'#6b5d50','#584c41');
+
+  // sandbags at both ends of the line
+  for(const [x0,dir] of [[GL+18,1],[GR-18,-1]]){
+    for(let i=0;i<3;i++){const x=x0+dir*(i*20+10);RR(g,x-11,LINE_Y-26,22,11,5,'#b39b6e');RR(g,x-11,LINE_Y-26,22,4,3,'rgba(255,255,255,.12)')}
+    for(let i=0;i<2;i++){const x=x0+dir*(i*20+20);RR(g,x-11,LINE_Y-36,22,11,5,'#c2aa7c')}
+  }
+  car(g,90,120,.35,'#7a4630'); car(g,875,70,-.6,'#3f5566');
+  for(let i=0;i<8;i++) bush(g,rand(10,W-10),rand(10,BT-40));
+  return c;
+}
+function roof(g,x,y,w,h,c1,c2){
+  g.fillStyle='#24231f'; g.fillRect(x,y,w,h);
+  g.fillStyle='#3b3a35'; g.fillRect(x+3,y+3,w-6,h-6);
+  g.fillStyle=c1; g.fillRect(x+9,y+9,w-18,h-18);
+  for(let i=0;i<900;i++){g.fillStyle=Math.random()<.5?'rgba(0,0,0,.18)':'rgba(255,255,255,.07)';g.fillRect(x+9+Math.random()*(w-18),y+9+Math.random()*(h-18),1.5,1.5)}
+  g.strokeStyle=c2; g.lineWidth=2;
+  for(let yy=y+70;yy<y+h-10;yy+=70){g.beginPath();g.moveTo(x+9,yy);g.lineTo(x+w-9,yy);g.stroke()}
+  // AC unit
+  const ax=x+w/2-22, ay=y+30;
+  g.fillStyle='rgba(0,0,0,.3)'; g.fillRect(ax+5,ay+5,44,34);
+  g.fillStyle='#9aa0a6'; g.fillRect(ax,ay,44,34); g.strokeStyle='#5c6166'; g.lineWidth=2; g.strokeRect(ax,ay,44,34);
+  C(g,ax+22,ay+17,12,'#3a3e42'); L(g,ax+12,ay+17,ax+32,ay+17,'#6c7176',2); L(g,ax+22,ay+7,ax+22,ay+27,'#6c7176',2);
+  // skylight
+  const sx=x+w/2-25, sy=y+140;
+  g.fillStyle='#2d2c28'; g.fillRect(sx-3,sy-3,56,86);
+  const sg=g.createLinearGradient(sx,sy,sx+50,sy+80); sg.addColorStop(0,'#8fb0c2'); sg.addColorStop(1,'#4d6878');
+  g.fillStyle=sg; g.fillRect(sx,sy,50,80);
+  L(g,sx+25,sy,sx+25,sy+80,'#2d2c28',3); L(g,sx,sy+40,sx+50,sy+40,'#2d2c28',3);
+  // vents + hatch
+  for(const [vx,vy] of [[x+30,y+h-60],[x+w-30,y+h-36],[x+28,y+95]]){C(g,vx+3,vy+3,9,'rgba(0,0,0,.3)');C(g,vx,vy,9,'#8a8e92');C(g,vx,vy,4,'#2a2c2e')}
+  g.fillStyle='#2e2d29'; g.fillRect(x+w/2-15,y+h-110,30,30); g.strokeStyle='#6d6a60'; g.lineWidth=2; g.strokeRect(x+w/2-15,y+h-110,30,30);
+}
+function car(g,x,y,a,col){
+  g.save(); g.translate(x,y); g.rotate(a);
+  RR(g,-32,-13,72,34,8,'rgba(0,0,0,.35)');
+  RR(g,-36,-17,72,34,8,col);
+  RR(g,-14,-14,32,28,5,'#22292e');
+  RR(g,-9,-12,20,24,4,col);
+  C(g,20,-8,4,'rgba(60,30,15,.6)'); C(g,-25,6,5,'rgba(60,30,15,.6)');
+  g.restore();
+}
+function bush(g,x,y){
+  E(g,x+5,y+6,20,15,'rgba(0,0,0,.25)');
+  for(let k=0;k<6;k++) C(g,x+rand(-10,10),y+rand(-8,8),rand(8,14),k%2?'#2f3d1f':'#3a4a25');
+}
+
+// ---- Entities ----
+let S, mode='menu', sid=0;
+const keys={}, mouse={x:W/2,y:200,down:false};
+const SKINS=[['#7f9a5a','#5d7540'],['#8aa36a','#64794a'],['#6f8a55','#4f673b'],['#93a06b','#6c7a4a']];
+const SHIRTS=['#5b4a6b','#6b3d3a','#3e5468','#7a6a4a','#4d4d4d','#5a6b45'];
+
+function newSoldier(x,y,heavy){
+  const hp=heavy?HEAVY_HP:SOLDIER_HP, mag=heavy?HEAVY_MAG:MAG;
+  return {id:++sid,x,y,hp,maxHp:hp,mag,reloadTime:heavy?HEAVY_RELOAD:RELOAD,heavy:!!heavy,tank:false,r:12,hull:-Math.PI/2,mz:28,ml:4.5,ang:-Math.PI/2,ammo:mag,reload:0,cd:0,flash:0,hurt:0,walk:0,alive:true};
+}
+function newTank(x,y){
+  return {...newSoldier(x,y),tank:true,r:TANK_R,hp:TANK_HP,maxHp:TANK_HP,mag:TANK_MAG,ammo:TANK_MAG,reloadTime:TANK_MG_RELOAD,mz:32,ml:7.5,shellCd:0,sflash:0};
+}
+function newTurret(x,y){
+  return {x,y,r:TURRET_R,hp:TURRET_HP,ang:-Math.PI/2,mag:TURRET_MAG,ammo:TURRET_MAG,reloadTime:TURRET_RELOAD,mz:26,ml:0,reload:0,cd:0,flash:0,hit:0};
+}
+function newZombie(){
+  const big=Math.random()<.04;
+  const hp=big?50:30;
+  const sk=pick(SKINS);
+  const spd=Math.min(45,rand(16,22)+S.wave*1.5)*(big?.7:1);
+  return {x:clamp(S.hordeX+rand(-170,170),GL+25,GR-25),y:rand(-420,-20),hp,maxHp:hp,spd,big,r:big?19:13,ph:rand(0,6.3),seed:rand(0,6.3),ang:Math.PI/2,hit:0,atk:false,vx:0,vy:0,skin:sk[0],skinD:sk[1],shirt:pick(SHIRTS)};
+}
+
+function reset(){
+  S={soldiers:[],zombies:[],bullets:[],parts:[],floats:[],coins:0,wave:0,toSpawn:0,spawnT:0,breakT:1.5,cleared:true,kills:0,fences:[],turrets:[],booms:[],placing:null,fenceRot:0,selected:null,time:0,banner:null,danger:0,flash:0,hordeX:W/2,dangerX:W/2};
+  for(let i=0;i<5;i++) S.soldiers.push(newSoldier(GL+50+i*(GR-GL-100)/4,LINE_Y-50));
+  dctx.clearRect(0,0,W,H);
+}
+function startWave(){
+  S.wave++; S.toSpawn=WAVE_STEP*S.wave; S.spawnT=.3; S.breakT=4; S.cleared=false;
+  S.hordeX=rand(GL+80,GR-80);
+  banner(T.waveStart(S.wave));
+}
+function banner(text){S.banner={text,t:2.2}}
+const live=()=>S.soldiers.filter(s=>s.alive);
+const squadSize=()=>S.soldiers.filter(s=>s.alive&&!s.tank).length;
+
+function pushRect(e,r,b){
+  const cx=clamp(e.x,b.x,b.x+b.w), cy=clamp(e.y,b.y,b.y+b.h);
+  const dx=e.x-cx, dy=e.y-cy, d=Math.hypot(dx,dy);
+  if(d<r){ if(d===0){e.y=b.y-r} else {e.x=cx+dx/d*r; e.y=cy+dy/d*r} }
+}
+function pushOut(e,r){
+  for(const b of BLD) pushRect(e,r,b);
+  for(const f of S.fences) pushRect(e,r,f);
+  for(const t of S.turrets){
+    const dx=e.x-t.x, dy=e.y-t.y, d=Math.hypot(dx,dy), m=r+t.r;
+    if(d<m){ if(d===0){e.y=t.y-m} else {e.x=t.x+dx/d*m; e.y=t.y+dy/d*m} }
+  }
+}
+// fence or turret the zombie is pressing against, with the point it hits
+function touchingBlock(z){
+  for(const f of S.fences){
+    const px=clamp(z.x,f.x,f.x+f.w), py=clamp(z.y,f.y,f.y+f.h);
+    if(Math.hypot(z.x-px,z.y-py)<z.r+4) return {o:f,px,py};
+  }
+  for(const t of S.turrets) if(Math.hypot(z.x-t.x,z.y-t.y)<z.r+t.r+4) return {o:t,px:t.x,py:t.y};
+  return null;
+}
+const inBuilding=(x,y)=>BLD.some(b=>x>b.x&&x<b.x+b.w&&y>b.y&&y<b.y+b.h);
+function segHit(x1,y1,x2,y2,cx,cy,r){
+  const dx=x2-x1, dy=y2-y1, l2=dx*dx+dy*dy||1;
+  const t=clamp(((cx-x1)*dx+(cy-y1)*dy)/l2,0,1);
+  return Math.hypot(x1+dx*t-cx,y1+dy*t-cy)<r;
+}
+
+function shoot(s,spread,rate){
+  if(s.reload>0||s.cd>0) return;
+  if(s.ammo<=0){s.reload=s.reloadTime;return}
+  s.ammo--; s.cd=rate; s.flash=.05;
+  fire(s,s.mz,s.ml,spread,BULLET_SPEED,.75,false);
+  if(s.ammo===0) s.reload=s.reloadTime;
+}
+function fireShell(s){
+  if(s.shellCd>0) return;
+  s.shellCd=SHELL_RELOAD; s.sflash=.12;
+  fire(s,42,0,.01,SHELL_SPEED,.6,true);
+}
+function fire(s,mz,ml,spread,sp,life,shell){
+  const a=s.ang, c=Math.cos(a), n=Math.sin(a);
+  const b=a+(Math.random()-.5)*2*spread;
+  // shots from a roof must not hit that roof
+  S.bullets.push({x:s.x+c*mz-n*ml,y:s.y+n*mz+c*ml,vx:Math.cos(b)*sp,vy:Math.sin(b)*sp,life,shell,roof:inBuilding(s.x,s.y)});
+}
+function blood(x,y,dx,dy,n,col){
+  for(let i=0;i<n;i++){const a=Math.atan2(dy,dx)+rand(-.7,.7), v=rand(60,220);
+    S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.15,.4),c:col,s:rand(1.5,3),decal:true})}
+}
+function sparks(x,y){for(let i=0;i<5;i++){const a=rand(0,6.3),v=rand(80,200);S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.08,.2),c:'#ffd77a',s:1.5,decal:false})}}
+function splat(x,y,s,col){
+  for(let i=0;i<12;i++){const a=rand(0,6.3),d=rand(0,14*s);dctx.globalAlpha=rand(.35,.75);C(dctx,x+Math.cos(a)*d,y+Math.sin(a)*d,rand(2,6)*s,col)}
+  dctx.globalAlpha=1;
+}
+function killZombie(z){
+  const gain=z.big?2:1;
+  S.coins+=gain; S.kills++;
+  S.floats.push({x:z.x,y:z.y-18,t:1,text:'+'+gain,c:'#f2c14e'});
+  splat(z.x,z.y,z.big?1.5:1,'#5a1a12');
+  dctx.globalAlpha=.7; drawZombie(dctx,{...z,ang:z.ang+rand(-.5,.5),hit:0},true); dctx.globalAlpha=1;
+}
+function killSoldier(s){
+  s.alive=false; s.hp=0;
+  if(S.selected===s) S.selected=null;
+  splat(s.x,s.y,1.2,'#7a1010');
+  dctx.globalAlpha=.75; drawSoldier(dctx,s,true); dctx.globalAlpha=1;
+  if(s.tank) S.booms.push({x:s.x,y:s.y,t:.5});
+  S.floats.push({x:s.x,y:s.y-20,t:1.4,text:s.tank?T.tankDead:T.soldierDead,c:'#ff6b5e'});
+  if(live().length===0) gameOver('squad');
+}
+
+// ---- Update ----
+function update(dt){
+  S.time+=dt; S.flash=Math.max(0,S.flash-dt);
+  // slowly fade old corpses and blood so the field stays readable
+  S.fadeT=(S.fadeT||0)+dt;
+  if(S.fadeT>.5){S.fadeT=0; dctx.globalCompositeOperation='destination-out'; dctx.fillStyle='rgba(0,0,0,.03)'; dctx.fillRect(0,0,W,H); dctx.globalCompositeOperation='source-over'}
+  if(S.banner){S.banner.t-=dt; if(S.banner.t<=0) S.banner=null}
+
+  if(S.toSpawn>0){
+    S.spawnT-=dt;
+    if(S.spawnT<=0&&S.zombies.length<MAX_ALIVE){S.zombies.push(newZombie());S.toSpawn--;S.spawnT=rand(.015,.04)}
+  } else if(S.zombies.length===0){
+    if(!S.cleared){S.cleared=true; banner(T.waveDone(S.wave))}
+    S.breakT-=dt; if(S.breakT<=0) startWave();
+  }
+
+  const team=live();
+  // AI soldiers gather under the zombie closest to the line, sorted by x so they don't cross paths
+  let lead=null; for(const z of S.zombies) if(z.y>0&&(!lead||z.y>lead.y)) lead=z;
+  S.dangerX+=((lead?lead.x:W/2)-S.dangerX)*Math.min(1,dt*1.5);
+  const ai=team.filter(s=>s!==S.selected).sort((a,b)=>a.x-b.x);
+  ai.forEach((s,i)=>{
+    const off=i-(ai.length-1)/2;
+    const baseX=W/2+off*Math.min(80,(GR-GL-80)/Math.max(1,ai.length-1));
+    const focusX=S.dangerX+off*45;
+    s.homeX=clamp(lead?(baseX+focusX)/2:baseX,GL+30,GR-30);
+  });
+  for(const s of team){
+    s.cd-=dt; s.flash-=dt; s.hurt-=dt;
+    if(s.tank){s.shellCd-=dt; s.sflash-=dt}
+    if(s.reload>0){s.reload-=dt; if(s.reload<=0){s.reload=0; s.ammo=s.mag}}
+    if(s===S.selected){
+      let mx=0,my=0;
+      if(keys.KeyW||keys.ArrowUp)my--; if(keys.KeyS||keys.ArrowDown)my++;
+      if(keys.KeyA||keys.ArrowLeft)mx--; if(keys.KeyD||keys.ArrowRight)mx++;
+      if(mx||my){const l=Math.hypot(mx,my), v=s.tank?SPEED*.75:SPEED; s.x+=mx/l*v*dt; s.y+=my/l*v*dt; s.walk+=dt*12; turnHull(s,mx,my,dt)}
+      s.ang=Math.atan2(mouse.y-s.y,mouse.x-s.x);
+      if(mouse.down) shoot(s,s.tank?.03:.035,s.tank?TANK_MG_RATE:.11);
+      if(s.tank&&keys.Space) fireShell(s);
+    } else {
+      // AI movement: back off from a close zombie, otherwise walk to its spot
+      let near=null, nd=1e9;
+      for(const z of S.zombies){const d=Math.hypot(z.x-s.x,z.y-s.y); if(d<nd){nd=d;near=z}}
+      let mx=0,my=0;
+      if(near&&nd<near.r+55){
+        mx=s.x-near.x; my=s.y-near.y;
+        if(my>0&&s.y>LINE_Y-35) mx+=(mx>=0?1:-1)*Math.abs(my)*2; // pinned at the line: step sideways
+      } else {
+        mx=s.homeX-s.x; my=(LINE_Y-55)-s.y;
+        if(Math.hypot(mx,my)<6){mx=0;my=0}
+      }
+      if(mx||my){const l=Math.hypot(mx,my), v=s.tank?AI_SPEED*.75:AI_SPEED; s.x+=mx/l*v*dt; s.y+=my/l*v*dt; s.walk+=dt*10; turnHull(s,mx,my,dt)}
+      s.y=Math.min(s.y,LINE_Y-10-s.r);
+      // AI aim: the zombie closest to the line, with a little lead
+      let best=null, by=-1e9;
+      for(const z of S.zombies){ if(z.y>-10 && Math.hypot(z.x-s.x,z.y-s.y)<AI_RANGE && z.y>by){by=z.y;best=z} }
+      if(best){
+        const t=Math.hypot(best.x-s.x,best.y-s.y)/BULLET_SPEED;
+        const want=Math.atan2(best.y+best.vy*t-s.y,best.x+best.vx*t-s.x);
+        const df=angDiff(s.ang,want); s.ang+=clamp(df,-7*dt,7*dt);
+        if(Math.abs(df)<.12){
+          shoot(s,s.tank?.05:AI_SPREAD,s.tank?TANK_AI_RATE:AI_RATE);
+          if(s.tank) fireShell(s);
+        }
+      } else if(s.ammo<s.mag&&s.reload<=0) s.reload=s.reloadTime;
+    }
+    s.x=clamp(s.x,s.r,W-s.r); s.y=clamp(s.y,s.r,H-s.r); pushOut(s,s.r);
+  }
+  for(let i=0;i<team.length;i++)for(let j=i+1;j<team.length;j++){
+    const a=team[i],b=team[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),m=a.r+b.r;
+    if(d>0&&d<m){const p=(m-d)/2;a.x-=dx/d*p;a.y-=dy/d*p;b.x+=dx/d*p;b.y+=dy/d*p}
+  }
+
+  for(const t of S.turrets){
+    t.cd-=dt; t.flash-=dt; t.hit-=dt;
+    if(t.reload>0){t.reload-=dt; if(t.reload<=0){t.reload=0; t.ammo=t.mag}}
+    let best=null, by=-1e9;
+    for(const z of S.zombies){ if(z.y>-10&&Math.hypot(z.x-t.x,z.y-t.y)<TURRET_RANGE&&z.y>by){by=z.y;best=z} }
+    if(best){
+      const tt=Math.hypot(best.x-t.x,best.y-t.y)/BULLET_SPEED;
+      const df=angDiff(t.ang,Math.atan2(best.y+best.vy*tt-t.y,best.x+best.vx*tt-t.x));
+      t.ang+=clamp(df,-9*dt,9*dt);
+      if(Math.abs(df)<.1) shoot(t,.07,TURRET_RATE);
+    } else if(t.ammo<t.mag&&t.reload<=0) t.reload=t.reloadTime;
+  }
+
+  S.danger=0;
+  for(const f of S.fences) f.hit-=dt;
+  for(const z of S.zombies){
+    z.ph+=dt*(z.atk?10:6); z.hit-=dt;
+    let t=null, td=1e9, blk;
+    for(const s of team){ if(!s.alive) continue; const d=Math.hypot(s.x-z.x,s.y-z.y); if(d<td){td=d;t=s} }
+    z.atk=false; z.vx=0; z.vy=0;
+    if(t&&td<z.r+t.r+2){
+      z.atk=true; z.ang=Math.atan2(t.y-z.y,t.x-z.x);
+      t.hp-=ZDPS*dt; t.hurt=.15;
+      if(t.hp<=0){killSoldier(t); if(mode!=='play') return}
+    } else if((blk=touchingBlock(z))){
+      z.atk=true; z.ang=Math.atan2(blk.py-z.y,blk.px-z.x);
+      blk.o.hp-=ZDPS*dt; blk.o.hit=.1;
+      if(blk.o.hp<=0) breakBlock(blk.o);
+    } else {
+      let tx=z.x+Math.sin(S.time*.8+z.seed)*35, ty=z.y+120;
+      if(t&&td<AGGRO){tx=t.x;ty=t.y}
+      // pushed beside the street by the crowd: walk back in, or it gets stuck on a roof
+      if(z.y<BT+z.r&&(z.x<GL+z.r||z.x>GR-z.r)){tx=clamp(z.x,GL+z.r+20,GR-z.r-20);ty=z.y+40}
+      const dx=tx-z.x, dy=ty-z.y, l=Math.hypot(dx,dy)||1;
+      z.vx=dx/l*z.spd; z.vy=dy/l*z.spd;
+      z.x+=z.vx*dt; z.y+=z.vy*dt;
+      z.ang+=angDiff(z.ang,Math.atan2(dy,dx))*Math.min(1,dt*6);
+    }
+    if(z.y>0) z.x=clamp(z.x,z.r,W-z.r);
+    pushOut(z,z.r);
+    S.danger=Math.max(S.danger,clamp((z.y-(LINE_Y-100))/100,0,1));
+    if(z.y>LINE_Y+6){gameOver('line'); return}
+  }
+  const zs=S.zombies;
+  for(let i=0;i<zs.length;i++){
+    const a=zs[i];
+    for(let j=i+1;j<zs.length;j++){
+      const b=zs[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),m=a.r+b.r;
+      if(d>0&&d<m){const p=(m-d)/2;a.x-=dx/d*p;a.y-=dy/d*p;b.x+=dx/d*p;b.y+=dy/d*p}
+    }
+    for(const s of team){
+      if(!s.alive) continue;
+      const dx=s.x-a.x,dy=s.y-a.y,d=Math.hypot(dx,dy),m=a.r+s.r-1;
+      if(d>0&&d<m){const p=(m-d)/2;a.x-=dx/d*p;a.y-=dy/d*p;s.x+=dx/d*p;s.y+=dy/d*p}
+    }
+  }
+
+  for(let i=S.bullets.length-1;i>=0;i--){
+    const b=S.bullets[i], ox=b.x, oy=b.y;
+    b.x+=b.vx*dt; b.y+=b.vy*dt; b.life-=dt;
+    let dead=b.life<=0||b.x<-20||b.x>W+20||b.y<-60||b.y>H+20;
+    if(dead&&b.shell&&b.life<=0) explode(b.x,b.y);
+    if(!dead) for(const z of zs){
+      if(z.hp>0&&segHit(ox,oy,b.x,b.y,z.x,z.y,z.r+2)){
+        if(b.shell){explode(b.x,b.y); dead=true; break}
+        z.hp-=DMG; z.hit=.08; z.x+=b.vx*.003; z.y+=b.vy*.003;
+        blood(z.x,z.y,b.vx,b.vy,4,'#6e1d14');
+        if(z.hp<=0) killZombie(z);
+        dead=true; break;
+      }
+    }
+    if(!dead&&!b.roof&&inBuilding(b.x,b.y)){if(b.shell) explode(b.x,b.y); else sparks(b.x,b.y); dead=true}
+    if(dead) S.bullets.splice(i,1);
+  }
+  S.zombies=zs.filter(z=>z.hp>0);
+  for(let i=S.booms.length-1;i>=0;i--){S.booms[i].t-=dt; if(S.booms[i].t<=0) S.booms.splice(i,1)}
+
+  for(let i=S.parts.length-1;i>=0;i--){
+    const p=S.parts[i]; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vx*=.9; p.vy*=.9; p.life-=dt;
+    if(p.life<=0){ if(p.decal){dctx.globalAlpha=.6;C(dctx,p.x,p.y,p.s,p.c);dctx.globalAlpha=1} S.parts.splice(i,1) }
+  }
+  for(let i=S.floats.length-1;i>=0;i--){const f=S.floats[i]; f.y-=28*dt; f.t-=dt; if(f.t<=0) S.floats.splice(i,1)}
+}
+
+// ---- Render ----
+function drawSoldier(g,s,corpse){
+  if(s.tank) return drawTank(g,s,corpse);
+  // heavy soldier: darker armour, black helmet, bulkier gun
+  const hv=s.heavy, body=hv?'#4a4d52':'#5d6b3a', arm=hv?'#43464b':'#55623a';
+  g.save(); g.translate(s.x,s.y);
+  if(!corpse) E(g,3,5,15,12,'rgba(0,0,0,.35)');
+  g.rotate(s.ang);
+  const st=corpse?0:Math.sin(s.walk)*4;
+  E(g,-3+st,-6,5.5,3.5,'#24231c'); E(g,-3-st,6,5.5,3.5,'#24231c');
+  RR(g,-14,-7,8,14,3,hv?'#33363a':'#3f4a28');
+  E(g,0,0,hv?10.5:9,hv?14:13,body);
+  if(hv){RR(g,-5,-9,9,18,2,'#2c2e31')}
+  g.fillStyle='#4b3522'; g.fillRect(2,2.5,9,4);
+  g.fillStyle='#1b1b1b'; g.fillRect(9,hv?2:3,19,hv?5:3); g.fillRect(14,5,hv?5:3,hv?6:4);
+  L(g,1,9,8,5.5,arm,5); L(g,1,-9,19,4.5,arm,5);
+  C(g,8,5.5,2.6,'#c99872'); C(g,19,4.5,2.6,'#c99872');
+  C(g,0,0,8.5,hv?'#1e1f21':'#3d4a24'); C(g,-.8,-.8,6.8,hv?'#33353a':'#56662f');
+  L(g,-4,-3.5,1,-4.5,'rgba(255,255,255,.18)',1.5);
+  if(!corpse&&s.flash>0){C(g,31,4.5,7,'rgba(255,190,70,.45)');C(g,30,4.5,3.5,'#fff1b0')}
+  if(!corpse&&s.hurt>0){g.globalAlpha=.4;C(g,0,0,13,'#ff3b30');g.globalAlpha=1}
+  g.restore();
+}
+function drawZombie(g,z,corpse){
+  g.save(); g.translate(z.x,z.y);
+  if(z.big) g.scale(1.45,1.45);
+  if(!corpse) E(g,3,5,14,11,'rgba(0,0,0,.35)');
+  g.rotate(z.ang);
+  const sw=corpse?0:Math.sin(z.ph)*3, lunge=(!corpse&&z.atk)?Math.abs(Math.sin(z.ph))*5:0;
+  E(g,-4+sw,-5,5,3.5,'#2a2620'); E(g,-4-sw,5,5,3.5,'#2a2620');
+  L(g,0,-8,16+sw+lunge,-6,z.skin,4.5); L(g,0,8,16-sw+lunge,6,z.skin,4.5);
+  C(g,16+sw+lunge,-6,2.7,z.skinD); C(g,16-sw+lunge,6,2.7,z.skinD);
+  E(g,0,0,8.5,12.5,z.shirt);
+  g.fillStyle='rgba(0,0,0,.3)'; g.beginPath(); g.moveTo(-4,-11); g.lineTo(1,-6); g.lineTo(-3,-2); g.fill();
+  C(g,-2,5,2.6,'rgba(120,15,15,.75)');
+  C(g,2,0,7.5,z.skin); C(g,-1.5,-1.5,4,z.skinD);
+  if(!corpse){C(g,7.2,-2.6,1.5,'#ff3a2a');C(g,7.2,2.6,1.5,'#ff3a2a')}
+  if(z.hit>0){g.globalAlpha=.6;C(g,0,0,13,'#ffffff');g.globalAlpha=1}
+  g.restore();
+}
+function drawFence(f,ghost){
+  const g=ctx, horiz=f.w>f.h, len=horiz?f.w:f.h;
+  g.save();
+  if(!ghost){g.fillStyle='rgba(0,0,0,.35)'; g.fillRect(f.x+4,f.y+5,f.w,f.h)}
+  g.translate(f.x+f.w/2,f.y+f.h/2); if(!horiz) g.rotate(Math.PI/2);
+  if(ghost) g.globalAlpha=.6;
+  for(let x=-len/2;x<len/2-1;x+=10){RR(g,x+1,-FENCE_T/2,8,FENCE_T,1.5,(x/10|0)%2?'#9a6b3c':'#a8774a'); L(g,x+4,-4,x+4,4,'rgba(60,35,15,.4)',1)}
+  g.fillStyle='#6b4423'; g.fillRect(-len/2,-2,len,4);
+  for(const px of [-len/2,0,len/2]) RR(g,px-4,-8,8,16,2,'#4a2f18');
+  if(!ghost&&f.hp<FENCE_HP*.5){L(g,-len/4,-5,-len/4+6,3,'#2a1a0c',1.5);L(g,len/5,-4,len/5-5,5,'#2a1a0c',1.5)}
+  if(!ghost&&f.hit>0){g.globalAlpha=.35;g.fillStyle='#ffffff';g.fillRect(-len/2,-FENCE_T/2,len,FENCE_T)}
+  g.restore();
+}
+function drawTank(g,s,wreck){
+  g.save(); g.translate(s.x,s.y);
+  g.save(); g.rotate(s.hull);
+  if(!wreck) RR(g,-19,-14,46,36,6,'rgba(0,0,0,.35)');
+  RR(g,-23,-18,46,10,3,'#1f1f1c'); RR(g,-23,8,46,10,3,'#1f1f1c');
+  const off=wreck?0:(s.walk*4)%6;
+  g.fillStyle='#3a3a35';
+  for(let x=-22+off;x<22;x+=6){g.fillRect(x,-17,2,8); g.fillRect(x,9,2,8)}
+  RR(g,-20,-11,40,22,4,wreck?'#2b2b26':'#56602f');
+  RR(g,-16,-8,30,16,3,wreck?'#33332e':'#66723a');
+  g.fillStyle=wreck?'#222':'#3d4a24'; g.fillRect(16,-9,4,18);
+  g.restore();
+  g.rotate(s.ang);
+  g.fillStyle='#1b1b1b'; g.fillRect(8,-2.5,30,5); RR(g,35,-3.5,7,7,1,'#111');
+  g.fillStyle='#141414'; g.fillRect(6,6.3,25,2.5); // machine gun
+  C(g,0,0,11,wreck?'#2a2a25':'#4b5a2c'); C(g,-1,-1,8,wreck?'#33332e':'#5f7036');
+  C(g,-3,3,3.2,wreck?'#1e1e1a':'#3d4a24');
+  if(!wreck&&s.flash>0){C(g,34,7.5,5,'rgba(255,190,70,.5)');C(g,33,7.5,2.5,'#fff1b0')}
+  if(!wreck&&s.sflash>0){C(g,46,0,10,'rgba(255,190,70,.55)');C(g,44,0,5,'#fff1b0')}
+  if(!wreck&&s.hurt>0){g.globalAlpha=.3;C(g,0,0,24,'#ff3b30')}
+  g.restore();
+}
+function drawTurret(t,ghost){
+  const g=ctx;
+  g.save(); g.translate(t.x,t.y);
+  if(ghost) g.globalAlpha=.6; else C(g,3,4,t.r+2,'rgba(0,0,0,.35)');
+  // sandbag ring + steel base
+  for(let i=0;i<8;i++){const a=i/8*Math.PI*2; E(g,Math.cos(a)*(t.r-2),Math.sin(a)*(t.r-2),6,4.5,i%2?'#b39b6e':'#c2aa7c')}
+  C(g,0,0,10,'#3c3f43'); C(g,0,0,7,'#55595e');
+  g.rotate(t.ang);
+  // twin barrels
+  g.fillStyle='#161616'; g.fillRect(4,-4,24,3); g.fillRect(4,1,24,3);
+  RR(g,-8,-7,16,14,3,'#4b5a2c'); RR(g,-6,-5,10,10,2,'#5f7036');
+  g.fillStyle='#8a6a2a'; g.fillRect(-7,6,6,5); // ammo box
+  if(!ghost&&t.flash>0){C(g,30,0,8,'rgba(255,190,70,.5)');C(g,29,0,4,'#fff1b0')}
+  if(!ghost&&t.hit>0){g.globalAlpha=.35;C(g,0,0,t.r,'#ffffff')}
+  g.restore();
+  if(!ghost&&t.reload>0){g.strokeStyle='#f2c14e';g.lineWidth=2;g.beginPath();g.arc(t.x,t.y,t.r+5,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-t.reload/t.reloadTime));g.stroke()}
+}
+function bar(x,y,w,frac,col){
+  ctx.fillStyle='rgba(0,0,0,.6)'; ctx.fillRect(x-w/2-1,y-1,w+2,5);
+  ctx.fillStyle=col; ctx.fillRect(x-w/2,y,w*clamp(frac,0,1),3);
+}
+function draw(){
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.drawImage(bg,0,0); ctx.drawImage(decal,0,0);
+
+  const pulse=.5+.5*Math.sin(S.time*(3+S.danger*8));
+  ctx.save(); ctx.shadowColor='rgba(255,40,30,.9)'; ctx.shadowBlur=8+pulse*12;
+  ctx.fillStyle='#e0322b'; ctx.fillRect(GL+18,LINE_Y-4,GR-GL-36,8); ctx.restore();
+  ctx.fillStyle='rgba(255,255,255,.18)'; ctx.fillRect(GL+18,LINE_Y-4,GR-GL-36,2);
+
+  for(const f of S.fences) drawFence(f,false);
+  for(const t of S.turrets) drawTurret(t,false);
+  const ents=[...S.zombies.map(z=>({z,y:z.y})),...live().map(s=>({s,y:s.y}))].sort((a,b)=>a.y-b.y);
+  for(const e of ents) e.z?drawZombie(ctx,e.z,false):drawSoldier(ctx,e.s,false);
+
+  for(const b of S.bullets){
+    if(b.shell){L(ctx,b.x-b.vx*.03,b.y-b.vy*.03,b.x,b.y,'rgba(200,190,170,.35)',4); C(ctx,b.x,b.y,3.5,'#ffcf6a'); continue}
+    const g=ctx.createLinearGradient(b.x-b.vx*.025,b.y-b.vy*.025,b.x,b.y);
+    g.addColorStop(0,'rgba(255,210,90,0)'); g.addColorStop(1,'rgba(255,235,160,1)');
+    L(ctx,b.x-b.vx*.025,b.y-b.vy*.025,b.x,b.y,g,2);
+  }
+  for(const p of S.parts) C(ctx,p.x,p.y,p.s,p.c);
+  for(const b of S.booms){
+    const k=1-b.t/.35, r=SPLASH*(.4+.6*Math.min(1,k));
+    const gr=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,r);
+    gr.addColorStop(0,`rgba(255,240,180,${Math.min(1,b.t*3)})`); gr.addColorStop(.5,`rgba(255,140,40,${Math.min(.8,b.t*2.5)})`); gr.addColorStop(1,'rgba(80,40,20,0)');
+    ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.fill();
+  }
+
+  const sel=S.selected;
+  if(sel){
+    ctx.save(); ctx.translate(sel.x,sel.y); ctx.rotate(S.time*1.5);
+    ctx.strokeStyle='#f2c14e'; ctx.lineWidth=2; ctx.setLineDash([6,5]);
+    ctx.beginPath(); ctx.arc(0,0,sel.r+8,0,Math.PI*2); ctx.stroke(); ctx.restore();
+    if(sel.mag>20){bar(sel.x,sel.y+sel.r+12,44,sel.reload>0?0:sel.ammo/sel.mag,'#f2c14e'); if(sel.shellCd<=0) C(ctx,sel.x+28,sel.y+sel.r+13.5,3,'#ff9b3d')}
+    else for(let i=0;i<sel.mag;i++){ctx.fillStyle=i<sel.ammo&&sel.reload<=0?'#f2c14e':'rgba(255,255,255,.18)';ctx.fillRect(sel.x-sel.mag*1.75+i*3.5,sel.y+sel.r+12,2.5,6)}
+    if(sel.reload>0){ctx.strokeStyle='#f2c14e';ctx.lineWidth=3;ctx.beginPath();ctx.arc(sel.x,sel.y,sel.r+12,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-sel.reload/sel.reloadTime));ctx.stroke()}
+    if(mode==='play'){
+      ctx.strokeStyle='rgba(242,193,78,.85)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(mouse.x,mouse.y,9,0,Math.PI*2); ctx.stroke();
+      L(ctx,mouse.x-14,mouse.y,mouse.x-5,mouse.y,'rgba(242,193,78,.85)',1.5); L(ctx,mouse.x+5,mouse.y,mouse.x+14,mouse.y,'rgba(242,193,78,.85)',1.5);
+      L(ctx,mouse.x,mouse.y-14,mouse.x,mouse.y-5,'rgba(242,193,78,.85)',1.5); L(ctx,mouse.x,mouse.y+5,mouse.x,mouse.y+14,'rgba(242,193,78,.85)',1.5);
+    }
+  }
+  for(const s of live()){const f=s.hp/s.maxHp; bar(s.x,s.y-s.r-13,s.tank?44:s.heavy?34:28,f,f>.5?'#6fd36b':f>.25?'#f2c14e':'#ff5a4e')}
+  for(const z of S.zombies) if(z.hp<z.maxHp) bar(z.x,z.y-z.r-9,z.big?34:24,z.hp/z.maxHp,'#d9302a');
+  for(const f of S.fences) if(f.hp<FENCE_HP) bar(f.x+f.w/2,f.y-9,40,f.hp/FENCE_HP,'#c9934f');
+  for(const t of S.turrets) if(t.hp<TURRET_HP) bar(t.x,t.y-t.r-12,34,t.hp/TURRET_HP,'#c9934f');
+
+  ctx.textAlign='center';
+  if(S.placing&&mode==='play'){
+    const gh=ghost(), ok=ghostValid(gh);
+    ctx.strokeStyle=ok?'#6fd36b':'#ff5a4e'; ctx.lineWidth=2;
+    if(S.placing==='fence'){drawFence(gh,true); ctx.strokeRect(gh.x-3,gh.y-3,gh.w+6,gh.h+6)}
+    else if(S.placing==='tank'){ctx.save(); ctx.globalAlpha=.6; drawTank(ctx,gh,false); ctx.restore(); ctx.beginPath(); ctx.arc(gh.x,gh.y,gh.r+4,0,Math.PI*2); ctx.stroke()}
+    else {drawTurret(gh,true); ctx.beginPath(); ctx.arc(gh.x,gh.y,gh.r+4,0,Math.PI*2); ctx.stroke();
+      ctx.strokeStyle='rgba(242,193,78,.25)'; ctx.setLineDash([4,6]); ctx.beginPath(); ctx.arc(gh.x,gh.y,TURRET_RANGE,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([])}
+    ctx.font='600 15px Rubik, system-ui, sans-serif'; ctx.fillStyle='#f2c14e';
+    ctx.fillText(ok?T.place(S.placing):T.cantPlace,W/2,H-10);
+  }
+  for(const f of S.floats){ctx.globalAlpha=clamp(f.t,0,1);ctx.font='700 15px Rubik, system-ui, sans-serif';ctx.fillStyle='#000';ctx.fillText(f.text,f.x+1,f.y+1);ctx.fillStyle=f.c;ctx.fillText(f.text,f.x,f.y)}
+  ctx.globalAlpha=1;
+
+  if(S.danger>0){
+    const vg=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.85);
+    vg.addColorStop(0,'rgba(200,0,0,0)'); vg.addColorStop(1,`rgba(200,0,0,${.35*S.danger*pulse})`);
+    ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+  }
+  if(S.banner){
+    ctx.globalAlpha=clamp(S.banner.t,0,1);
+    ctx.font='54px "Black Ops One", Impact, sans-serif';
+    ctx.fillStyle='rgba(0,0,0,.6)'; ctx.fillText(S.banner.text,W/2+3,170+3);
+    ctx.fillStyle='#ece6d6'; ctx.fillText(S.banner.text,W/2,170);
+    ctx.globalAlpha=1;
+  }
+  if(S.toSpawn===0&&S.zombies.length===0&&mode==='play'&&S.breakT>0&&!S.banner){
+    ctx.font='600 16px Rubik, system-ui, sans-serif'; ctx.fillStyle='rgba(236,230,214,.8)';
+    ctx.fillText(T.nextWave(Math.ceil(S.breakT)),W/2,170);
+  }
+  if(!sel&&!S.placing&&mode==='play'&&S.time<12){
+    ctx.font='600 15px Rubik, system-ui, sans-serif'; ctx.fillStyle='rgba(242,193,78,.9)';
+    ctx.fillText(T.clickHint,W/2,H-10);
+  }
+}
+
+// ---- HUD, overlay, shop ----
+function set(id,v){const e=$(id); v=String(v); if(e.textContent!==v) e.textContent=v}
+function hud(){
+  set('coins',S.coins); set('wave',S.wave); set('kills',S.kills); set('squad',squadSize()+'/'+MAX_SQUAD);
+  const s=S.selected;
+  set('ammo',!s?'—':(s.reload>0?T.reloading:s.ammo+'/'+s.mag)+(s.tank?(s.shellCd>0?T.cannonWait:T.cannonOk):''));
+  const full=squadSize()>=MAX_SQUAD, inGame=mode==='play';
+  $('hire').disabled=!inGame||S.coins<HIRE_COST||full;
+  $('hireHeavy').disabled=!inGame||S.coins<HEAVY_COST||full;
+  if(S.placing&&S.coins<ITEMS[S.placing].cost) S.placing=null;
+  for(const k in ITEMS){
+    const on=S.placing===k, open=save.unlocked[k];
+    $(k).disabled=!inGame||!open||(S.coins<ITEMS[k].cost&&!on);
+    $(k).title=open?'':T.unlockInMenu;
+    $(k+'Buy').hidden=on||!open; $(k+'Lock').hidden=open; $(k+'Cancel').hidden=!on;
+  }
+  $('pauseBtn').disabled=mode!=='play'&&mode!=='pause';
+  $('quit').disabled=mode!=='play'&&mode!=='pause';
+  set('quitGain',payout());
+}
+function hire(heavy){
+  const cost=heavy?HEAVY_COST:HIRE_COST;
+  if(mode!=='play'||S.coins<cost||squadSize()>=MAX_SQUAD) return;
+  S.coins-=cost;
+  const s=newSoldier(rand(GL+40,GR-40),LINE_Y-45,heavy); S.soldiers.push(s);
+  S.floats.push({x:s.x,y:s.y-22,t:1.2,text:heavy?T.heavy:T.newSoldier,c:'#6fd36b'});
+}
+function toggleBuild(kind){
+  if(mode!=='play') return;
+  S.placing=S.placing===kind||!save.unlocked[kind]||S.coins<ITEMS[kind].cost?null:kind;
+}
+function explode(x,y){
+  for(const z of S.zombies){
+    if(z.hp<=0) continue;
+    const dx=z.x-x, dy=z.y-y, d=Math.hypot(dx,dy);
+    if(d<SPLASH+z.r){
+      z.hp-=SHELL_DMG; z.hit=.1;
+      if(d>0){z.x+=dx/d*10; z.y+=dy/d*10}
+      blood(z.x,z.y,dx||1,dy,3,'#6e1d14');
+      if(z.hp<=0) killZombie(z);
+    }
+  }
+  S.booms.push({x,y,t:.35});
+  for(let i=0;i<12;i++){const a=rand(0,6.3),v=rand(80,260);S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.15,.35),c:i%2?'#ffb347':'#5a5650',s:rand(2,3.5),decal:false})}
+  dctx.globalAlpha=.35; C(dctx,x,y,24,'#1a1a14'); dctx.globalAlpha=1;
+}
+function ghost(){
+  if(S.placing==='turret') return {x:mouse.x,y:mouse.y,r:TURRET_R,ang:-Math.PI/2};
+  if(S.placing==='tank') return {x:mouse.x,y:mouse.y,r:TANK_R,ang:-Math.PI/2,hull:-Math.PI/2,walk:0,flash:0,sflash:0,hurt:0};
+  const w=S.fenceRot?FENCE_T:FENCE_LEN, h=S.fenceRot?FENCE_LEN:FENCE_T;
+  return {x:mouse.x-w/2,y:mouse.y-h/2,w,h};
+}
+function ghostValid(g){
+  // compare everything as boxes; round things use their bounding square
+  const box=o=>o.r?{x:o.x-o.r,y:o.y-o.r,w:o.r*2,h:o.r*2}:o;
+  const b=box(g), over=(o)=>b.x<o.x+o.w&&b.x+b.w>o.x&&b.y<o.y+o.h&&b.y+b.h>o.y;
+  if(b.x<2||b.x+b.w>W-2||b.y<2||b.y+b.h>H-2) return false;
+  // fences and turrets may stand anywhere, even on roofs; a tank has to drive
+  if(S.placing==='tank'&&BLD.some(over)) return false;
+  return ![...S.fences,...S.turrets,...live().filter(s=>s.tank)].map(box).some(over);
+}
+function placeBuild(){
+  const kind=S.placing, g=ghost();
+  if(!kind||!save.unlocked[kind]||S.coins<ITEMS[kind].cost||!ghostValid(g)) return;
+  S.coins-=ITEMS[kind].cost;
+  if(kind==='fence') S.fences.push({...g,hp:FENCE_HP,hit:0});
+  else if(kind==='tank') S.soldiers.push(newTank(g.x,g.y));
+  else S.turrets.push(newTurret(g.x,g.y));
+  S.placing=null;
+}
+function breakBlock(o){
+  const isFence=S.fences.includes(o);
+  if(isFence) S.fences.splice(S.fences.indexOf(o),1); else S.turrets.splice(S.turrets.indexOf(o),1);
+  const cx=isFence?o.x+o.w/2:o.x, cy=isFence?o.y+o.h/2:o.y;
+  for(let i=0;i<14;i++){const a=rand(0,6.3),v=rand(40,160);
+    S.parts.push({x:cx+rand(-20,20),y:cy+rand(-6,6),vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.2,.5),c:isFence?'#8a5d33':'#55595e',s:rand(1.5,3),decal:true})}
+  S.floats.push({x:cx,y:cy-16,t:1.2,text:isFence?T.fenceDead:T.turretDead,c:'#ff6b5e'});
+}
+// ---- Bank and items (kept in this browser only) ----
+const SAVE_KEY='czerwona-linia-save';
+let save={bank:0,best:0,unlocked:{fence:false,turret:false,tank:false}};
+try{
+  const d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+  if(d){
+    save.bank=d.bank|0; save.best=d.best|0;
+    // older saves counted items; any item owned there counts as unlocked
+    for(const k in save.unlocked) save.unlocked[k]=!!(d.unlocked&&d.unlocked[k])||(d.inv&&d.inv[k]>0)||false;
+  } else save.best=+localStorage.getItem('czerwona-linia-best')||0;
+}catch(e){}
+function store(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(e){}}
+// half of the coins you still have, rounded down, so there is never 0,5
+const payout=()=>Math.floor(S.coins/2);
+
+function showOverlay(title,text,small,btn){
+  set('ovTitle',title); set('ovText',text); set('ovSmall',small); set('ovBtn',btn);
+  $('menu').hidden=mode!=='menu'; $('ov').hidden=false;
+}
+function renderMenu(){
+  set('bank',save.bank);
+  $('items').innerHTML=Object.entries(ITEMS).map(([k,it])=>`
+    <div class="item">
+      <div><b>${T[k]}</b><small>${T['desc_'+k]} ${T.inGame(it.cost)}</small></div>
+      ${save.unlocked[k]?`<div class="take" style="color:#6fd36b">${T.unlocked}</div>`:`<button class="buy" data-buy="${k}" ${save.bank<it.cost?'disabled':''}>${T.unlock} · ${it.cost} <span class="coin"></span></button>`}
+    </div>`).join('');
+}
+$('items').onclick=e=>{
+  const b=e.target.closest('button'); if(!b||b.disabled||!b.dataset.buy) return;
+  const k=b.dataset.buy;
+  if(mode!=='menu'||save.unlocked[k]||save.bank<ITEMS[k].cost) return;
+  save.bank-=ITEMS[k].cost; save.unlocked[k]=true; store();
+  renderMenu();
+};
+function showMenu(){
+  mode='menu'; reset();
+  renderMenu();
+  showOverlay(T.title,T.menuText,T.menuSmall(save.best),'Start');
+}
+function start(){
+  reset(); mode='play';
+  $('ov').hidden=true; cv.focus();
+}
+function setPause(p){
+  if(p&&mode==='play'){mode='pause'; mouse.down=false; showOverlay(T.paused,T.pausedText,'',T.resume)}
+  else if(!p&&mode==='pause'){mode='play'; $('ov').hidden=true; cv.focus()}
+}
+function endGame(title,text){
+  mode='over'; mouse.down=false; S.flash=1; S.placing=null;
+  const survived=Math.max(0,S.wave-1), gain=payout();
+  save.bank+=gain; if(survived>save.best) save.best=survived; store();
+  showOverlay(title,text,T.endSmall(survived,S.kills,gain,S.coins,save.bank),'Menu');
+}
+function gameOver(reason){
+  endGame(reason==='line'?T.lineBroken:T.squadDead, reason==='line'?T.lineBrokenText:T.squadDeadText);
+}
+function quitGame(){
+  if(mode!=='play'&&mode!=='pause') return;
+  endGame(T.retreat,T.retreatText);
+}
+$('ovBtn').onclick=()=>{ if(mode==='pause') setPause(false); else if(mode==='menu') start(); else showMenu() };
+$('hire').onclick=()=>{hire(false);cv.focus()};
+$('hireHeavy').onclick=()=>{hire(true);cv.focus()};
+for(const k in ITEMS) $(k).onclick=()=>{toggleBuild(k);cv.focus()};
+$('pauseBtn').onclick=()=>{setPause(mode==='play')};
+$('quit').onclick=quitGame;
+
+// ---- Input ----
+function toGame(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
+cv.addEventListener('pointerdown',e=>{
+  cv.focus(); const p=toGame(e); mouse.x=p.x; mouse.y=p.y;
+  if(mode!=='play') return;
+  if(e.button===2){ if(S.placing) placeBuild(); else S.selected=null; return }
+  if(e.button!==0) return;
+  let hit=null, hd=1e9;
+  for(const s of live()){const d=Math.hypot(s.x-p.x,s.y-p.y); if(d<s.r+10&&d<hd){hd=d;hit=s}}
+  if(hit&&hit!==S.selected){S.selected=hit; mouse.down=false; return}
+  if(S.selected){mouse.down=true; try{cv.setPointerCapture(e.pointerId)}catch(_){}}
+});
+cv.addEventListener('pointermove',e=>{const p=toGame(e); mouse.x=p.x; mouse.y=p.y});
+cv.addEventListener('pointerup',()=>{mouse.down=false});
+cv.addEventListener('pointercancel',()=>{mouse.down=false});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('wheel',e=>{ if(mode==='play'&&S.placing==='fence'){e.preventDefault(); S.fenceRot=1-S.fenceRot} },{passive:false});
+const GAME_KEYS=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Tab','Space'];
+window.addEventListener('keydown',e=>{
+  if(e.code==='KeyP'){setPause(mode==='play'); return}
+  if(mode!=='play') return;
+  if(GAME_KEYS.includes(e.code)) e.preventDefault();
+  keys[e.code]=true;
+  const s=S.selected;
+  if(e.code==='KeyR'&&s&&s.reload<=0&&s.ammo<s.mag) s.reload=s.reloadTime;
+  if(e.code==='Escape'){ if(S.placing) S.placing=null; else S.selected=null }
+  if(e.code==='Digit5') toggleBuild('tank');
+  if(e.code==='Digit1') hire(false);
+  if(e.code==='Digit2') hire(true);
+  if(e.code==='Digit3') toggleBuild('fence');
+  if(e.code==='Digit4') toggleBuild('turret');
+  if(e.code==='KeyQ'&&S.placing==='fence') S.fenceRot=1-S.fenceRot;
+  if(e.code==='Tab'){const t=live(); if(t.length){const i=t.indexOf(s); S.selected=t[(i+1)%t.length]}}
+});
+window.addEventListener('keyup',e=>{keys[e.code]=false});
+window.addEventListener('blur',()=>{for(const k in keys) keys[k]=false; mouse.down=false});
+document.addEventListener('visibilitychange',()=>{if(document.hidden) setPause(true)});
+
+// ---- Boot ----
+applyLang();
+$('langBtn').onclick=()=>{setLang(lang==='pl'?'en':'pl'); if(mode==='play') cv.focus()};
+bg=makeBg();
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{bg=makeBg()});
+showMenu();
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now;
+  if(mode==='play') update(dt);
+  draw(); hud();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
